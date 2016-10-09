@@ -1,7 +1,0 @@
-{
-    "name": "vmolero/semantic-search",
-    "description": "Victor Molero Challenge #3. Semantic Search"
-    "require": {
-        "symfony/symfony": "^3.1"
-    }
-}
