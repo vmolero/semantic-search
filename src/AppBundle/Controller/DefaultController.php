@@ -3,6 +3,8 @@
 namespace AppBundle\Controller;
 
 use AppBundle\VMolero\Semantic\PorterStemmer;
+use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManager;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,7 +23,7 @@ class DefaultController extends Controller
         ));
     }
     /**
-     * @Route("/review", name="review")
+     * @Route("/new", name="review")
      * @param Request $request
      */
     public function reviewAction(Request $request)
@@ -59,5 +61,20 @@ class DefaultController extends Controller
             echo implode('::', $line) . '<br>';
         }
         return new Response(ob_get_clean());
+    }
+    /**
+     * @Route("/review", name="show_all")
+     * @Route("/review/{reviewId}", name="show_one")
+     */
+    public function showAction(Request $request, $reviewId = null)
+    {
+        /** @var EntityManager $em */
+        $em    = $this->getDoctrine()->getManager();
+        /** @var Connection $con */
+        $query = $em->createQuery('SELECT * FROM ss_review');
+        $r     = $query->getResult();
+        var_dump($r);
+        die;
+        return new Response($reviewId ?: "ALL");
     }
 }
