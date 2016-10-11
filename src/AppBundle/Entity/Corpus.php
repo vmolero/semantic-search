@@ -2,12 +2,14 @@
 
 namespace AppBundle\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
+
 /**
  * Description of Corpus
  *
  * @author Víctor Molero
  *
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\CorpusRepository")
  * @ORM\Table(name="ss_corpus")
  */
 final class Corpus
@@ -19,13 +21,21 @@ final class Corpus
      */
     private $id;
     /**
-     * @ORM\Column(type="string" unique="true")
+     * @ORM\Column(type="string", unique=true)
      */
     private $stem;
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="string", unique=true)
+     */
+    private $lemma;
+    /**
+     * @ORM\Column(type="float")
      */
     private $prescore;
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $feedback;
 
     public function getId()
     {
@@ -38,6 +48,24 @@ final class Corpus
     public function getPrescore()
     {
         return $this->prescore;
+    }
+    public function getLemma()
+    {
+        return $this->lemma;
+    }
+    public function getFeedback()
+    {
+        return $this->feedback;
+    }
+    public function setFeedback($feedback)
+    {
+        $this->feedback = $feedback;
+        return $this;
+    }
+    public function setLemma($lemma)
+    {
+        $this->lemma = $lemma;
+        return $this;
     }
     public function setId($id)
     {
@@ -56,7 +84,7 @@ final class Corpus
     }
     public function toArray()
     {
-        return ['id' => $this->getId(), 'stem' => $this->getStem(), 'prescore' => $this->getPrescore()];
+        return ['id' => $this->getId(), 'stem' => $this->getStem(), 'lemma' => $this->getLemma(), 'prescore' => $this->getPrescore()];
     }
     public function __toString()
     {

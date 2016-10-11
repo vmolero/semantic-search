@@ -26,19 +26,23 @@ final class Review
      */
     private $review;
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="float")
      */
     private $score;
     /**
+     * @ORM\Column(type="integer")
+     */
+    private $feedback;
+
+    /**
      * @var ArrayCollection
      *
-     * @ORM\ManyToMany(targetEntity="Word", mappedBy="ss_review")
-     */
-    private $words;
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Word", mappedBy="ss_review")
 
+      private $words; */
     public function __construct()
     {
-        $this->words = new ArrayCollection();
+        // $this->words = new ArrayCollection();
     }
     public function getId()
     {
@@ -51,6 +55,15 @@ final class Review
     public function getScore()
     {
         return $this->score;
+    }
+    public function getFeedback()
+    {
+        return $this->feedback;
+    }
+    public function setFeedback($feedback)
+    {
+        $this->feedback = $feedback;
+        return $this;
     }
     public function setId($id)
     {
@@ -69,7 +82,7 @@ final class Review
     }
     public function toArray()
     {
-        return ['id' => $this->getID(), 'review' => $this->getReview(), 'score' => $this->getScore()];
+        return ['id' => $this->getID(), 'review' => $this->getReview(), 'score' => $this->getScore(), 'feedback' => $this->getFeedback()];
     }
     public function __toString()
     {

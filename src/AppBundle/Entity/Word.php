@@ -2,7 +2,9 @@
 
 namespace AppBundle\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
+
+// use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * Description of Word
@@ -24,28 +26,30 @@ final class Word
     /**
      * @var string
      *
-     * @ORM\Column(type="string" unique="true")
+     * @ORM\Column(type="string", unique=true)
      */
     private $word;
     /**
      * @var integer
      *
      * @ORM\Column(type="integer")
-     * @ORM\OneToOne(targetEntity="Corpus")
-     * @ORM\JoinColumn(name="corpusId", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Corpus")
+     * @ORM\JoinColumn(name="corpus_id", referencedColumnName="id")
      */
     private $corpusId;
-    /**
-     * @var ArrayCollection
-     *
-     * @ORM\ManyToMany(targetEntity="Review" inversedBy="ss_word")
-     * @ORM\JoinTable(name="ss_word_review")
-     */
-    private $reviews;
 
+    /**
+     * var ArrayCollection
+     *
+     * ORM\ManyToOne(targetEntity="AppBundle\Entity\Review" inversedBy="ss_word")
+     * ORM\JoinTable(name="ss_word_review",
+     *      joinColumns={@JoinColumn(name="word_id", referencedColumnName="id")},
+     *      inverseJoinColumns={@JoinColumn(name="friend_user_id", referencedColumnName="id")})
+
+      private $reviews; */
     public function __construct()
     {
-        $this->reviews = new ArrayCollection();
+        // $this->reviews = new ArrayCollection();
     }
     public function getId()
     {
