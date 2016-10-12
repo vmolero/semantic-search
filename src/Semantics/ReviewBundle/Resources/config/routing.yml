@@ -1,6 +1,0 @@
-review_homepage:
-    path:     /review
-    defaults: { _controller: ReviewBundle:Default:index }
-review_add: 
-    path: /review/new 
-    defaults: { _controller: ReviewBundle:Default:new }

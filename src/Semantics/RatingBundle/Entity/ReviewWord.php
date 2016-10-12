@@ -1,6 +1,6 @@
 <?php
 
-namespace Semantics\Entity;
+namespace Semantics\RatingBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * ReviewWord
  *
  * @ORM\Table(name="review_word")
- * @ORM\Entity(repositoryClass="Semantics\Repository\ReviewWordRepository")
+ * @ORM\Entity(repositoryClass="Semantics\RatingBundle\Repository\ReviewWordRepository")
  */
 class ReviewWord
 {

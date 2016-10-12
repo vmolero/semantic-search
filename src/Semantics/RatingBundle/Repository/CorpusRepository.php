@@ -1,6 +1,6 @@
 <?php
 
-namespace Semantics\Repository;
+namespace Semantics\RatingBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
 

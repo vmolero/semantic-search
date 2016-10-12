@@ -16,8 +16,6 @@ class AppKernel extends Kernel
             new Doctrine\Bundle\DoctrineBundle\DoctrineBundle(),
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
             // new AppBundle\AppBundle(),
-            new Semantics\CriteriaBundle\CriteriaBundle(),
-            new Semantics\ReviewBundle\ReviewBundle(),
             new Thrace\DataGridBundle\ThraceDataGridBundle(),
             new Semantics\RatingBundle\RatingBundle(),
         );

@@ -1,6 +1,6 @@
 <?php
 
-namespace Semantics\Entity;
+namespace Semantics\RatingBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
@@ -37,7 +37,7 @@ final class Review
     /**
      * @var ArrayCollection
      *
-     * @ORM\OneToMany(targetEntity="Semantics\Entity\Word", mappedBy="ss_review")
+     * @ORM\OneToMany(targetEntity="Semantics\RatingBundle\Entity\Word", mappedBy="ss_review")
 
       private $words; */
     public function __construct()

@@ -1,6 +1,6 @@
 <?php
 
-namespace Semantics\Entity;
+namespace Semantics\RatingBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -33,7 +33,7 @@ final class Word
      * @var integer
      *
      * @ORM\Column(type="integer")
-     * @ORM\ManyToOne(targetEntity="Semantics\Entity\Corpus")
+     * @ORM\ManyToOne(targetEntity="Semantics\RatingBundle\Entity\Corpus")
      * @ORM\JoinColumn(name="corpus_id", referencedColumnName="id")
      */
     private $corpusId;
@@ -41,7 +41,7 @@ final class Word
     /**
      * var ArrayCollection
      *
-     * ORM\ManyToOne(targetEntity="Semantics\Entity\Review" inversedBy="ss_word")
+     * ORM\ManyToOne(targetEntity="Semantics\RatingBundle\Entity\Review" inversedBy="ss_word")
      * ORM\JoinTable(name="ss_word_review",
      *      joinColumns={@JoinColumn(name="word_id", referencedColumnName="id")},
      *      inverseJoinColumns={@JoinColumn(name="friend_user_id", referencedColumnName="id")})

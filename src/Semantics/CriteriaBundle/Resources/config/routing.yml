@@ -1,3 +1,0 @@
-criteria_homepage:
-    path:     /criteria
-    defaults: { _controller: CriteriaBundle:Criteria:index }

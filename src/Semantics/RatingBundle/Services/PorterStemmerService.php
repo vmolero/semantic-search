@@ -11,7 +11,7 @@
  * o------------------------------------------------------------------------------o
  */
 
-namespace Semantics\Services;
+namespace Semantics\RatingBundle\Services;
 
 /**
  * PHP5 Implementation of the Porter Stemmer algorithm. Certain elements

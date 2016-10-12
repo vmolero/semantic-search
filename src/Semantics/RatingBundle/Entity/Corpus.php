@@ -1,6 +1,6 @@
 <?php
 
-namespace Semantics\Entity;
+namespace Semantics\RatingBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @author Víctor Molero
  *
- * @ORM\Entity(repositoryClass="Semantics\Repository\CorpusRepository")
+ * @ORM\Entity(repositoryClass="Semantics\RatingBundle\Repository\CorpusRepository")
  * @ORM\Table(name="ss_corpus")
  */
 final class Corpus

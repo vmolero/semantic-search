@@ -1,6 +1,6 @@
 <?php
 
-namespace Semantics\Services;
+namespace Semantics\RatingBundle\Services;
 
 use anlutro\cURL\cURL;
 use DOMDocument;

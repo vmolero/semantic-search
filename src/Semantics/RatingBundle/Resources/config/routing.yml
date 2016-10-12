@@ -1,3 +1,9 @@
 rating_homepage:
-    path:     /
-    defaults: { _controller: RatingBundle:Default:index }
+    path:     /rating
+    defaults: { _controller: RatingBundle:Rating:index }
+review_index:
+    path:     /review
+    defaults: { _controller: RatingBundle:Review:index }
+criteria_index:
+    path:     /criteria
+    defaults: { _controller: RatingBundle:Criteria:index }
