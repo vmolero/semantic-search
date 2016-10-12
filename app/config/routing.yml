@@ -1,3 +1,11 @@
-app:
-    resource: "@AppBundle/Controller/"
-    type:     annotation
+rating:
+    resource: "@RatingBundle/Resources/config/routing.yml"
+    prefix:   /
+
+review:
+    resource: "@ReviewBundle/Resources/config/routing.yml"
+    prefix:   /
+
+criteria:
+    resource: "@CriteriaBundle/Resources/config/routing.yml"
+    prefix:   /

@@ -11,36 +11,30 @@
  * o------------------------------------------------------------------------------o
  */
 
-namespace AppBundle\VMolero\Semantic;
+namespace Semantics\Services;
 
 /**
  * PHP5 Implementation of the Porter Stemmer algorithm. Certain elements
  * were borrowed from the (broken) implementation by Jon Abernathy.
- *
- * Usage:
- *
- *  $stem = PorterStemmer::Stem($word);
- *
- * How easy is that?
  */
-class PorterStemmer
+final class PorterStemmerService
 {
     /**
      * Regex for matching a consonant
      * @var string
      */
-    private static $regex_consonant = '(?:[bcdfghjklmnpqrstvwxz]|(?<=[aeiou])y|^y)';
+    private $regex_consonant = '(?:[bcdfghjklmnpqrstvwxz]|(?<=[aeiou])y|^y)';
     /**
      * Regex for matching a vowel
      * @var string
      */
-    private static $regex_vowel = '(?:[aeiou]|(?<![aeiou])y)';
+    private $regex_vowel     = '(?:[aeiou]|(?<![aeiou])y)';
     /**
      * Cache for mass stemmings. Do not use for mass stemmings of *different* words. Use for
      * stemming words from documents for example, where the same word may crop up multiple times.
      * @var array
      */
-    private static $cache = array();
+    private $cache           = array();
 
     /**
      * Stems a word. Simple huh?
@@ -49,15 +43,15 @@ class PorterStemmer
      * @param  bool   $cache Whether to use caching
      * @return string        Stemmed word
      */
-    public static function Stem($word, $cache = false)
+    public function Stem($word, $cache = false)
     {
         if (strlen($word) <= 2) {
             return $word;
         }
 
         // Check cache
-        if ($cache AND ! empty(self::$cache[$word])) {
-            return self::$cache[$word];
+        if ($cache AND ! empty($this->$cache[$word])) {
+            return $this->$cache[$word];
         }
 
         /**
@@ -65,16 +59,16 @@ class PorterStemmer
          */
         $word = preg_replace("/('ve|n't|'d)$/", '', $word);
 
-        $stem = self::step1ab($word);
-        $stem = self::step1c($stem);
-        $stem = self::step2($stem);
-        $stem = self::step3($stem);
-        $stem = self::step4($stem);
-        $stem = self::step5($stem);
+        $stem = $this->step1ab($word);
+        $stem = $this->step1c($stem);
+        $stem = $this->step2($stem);
+        $stem = $this->step3($stem);
+        $stem = $this->step4($stem);
+        $stem = $this->step5($stem);
 
         // Store in cache
         if ($cache) {
-            self::$cache[$word] = $stem;
+            $this->$cache[$word] = $stem;
         }
 
         return $stem;
@@ -82,37 +76,37 @@ class PorterStemmer
     /**
      * Step 1
      */
-    private static function step1ab($word)
+    private function step1ab($word)
     {
         // Part a
         if (substr($word, -1) == 's') {
 
-            self::replace($word, 'sses', 'ss')
-                    OR self::replace($word, 'ies', 'i')
-                    OR self::replace($word, 'ss', 'ss')
-                    OR self::replace($word, 's', '');
+            $this->replace($word, 'sses', 'ss')
+                    OR $this->replace($word, 'ies', 'i')
+                    OR $this->replace($word, 'ss', 'ss')
+                    OR $this->replace($word, 's', '');
         }
 
         // Part b
-        if (substr($word, -2, 1) != 'e' OR ! self::replace($word, 'eed', 'ee', 0)) { // First rule
-            $v = self::$regex_vowel;
+        if (substr($word, -2, 1) != 'e' OR ! $this->replace($word, 'eed', 'ee', 0)) { // First rule
+            $v = $this->$regex_vowel;
 
             // ing and ed
-            if (preg_match("#$v+#", substr($word, 0, -3)) && self::replace($word, 'ing', '')
-                    OR preg_match("#$v+#", substr($word, 0, -2)) && self::replace($word, 'ed', '')) { // Note use of && and OR, for precedence reasons
+            if (preg_match("#$v+#", substr($word, 0, -3)) && $this->replace($word, 'ing', '')
+                    OR preg_match("#$v+#", substr($word, 0, -2)) && $this->replace($word, 'ed', '')) { // Note use of && and OR, for precedence reasons
                 // If one of above two test successful
-                if (!self::replace($word, 'at', 'ate')
-                        AND ! self::replace($word, 'bl', 'ble')
-                        AND ! self::replace($word, 'iz', 'ize')) {
+                if (!$this->replace($word, 'at', 'ate')
+                        AND ! $this->replace($word, 'bl', 'ble')
+                        AND ! $this->replace($word, 'iz', 'ize')) {
 
                     // Double consonant ending
-                    if (self::doubleConsonant($word)
+                    if ($this->doubleConsonant($word)
                             AND substr($word, -2) != 'll'
                             AND substr($word, -2) != 'ss'
                             AND substr($word, -2) != 'zz') {
 
                         $word = substr($word, 0, -1);
-                    } else if (self::m($word) == 1 AND self::cvc($word)) {
+                    } else if ($this->m($word) == 1 AND $this->cvc($word)) {
                         $word .= 'e';
                     }
                 }
@@ -126,12 +120,12 @@ class PorterStemmer
      *
      * @param string $word Word to stem
      */
-    private static function step1c($word)
+    private function step1c($word)
     {
-        $v = self::$regex_vowel;
+        $v = $this->$regex_vowel;
 
         if (substr($word, -1) == 'y' && preg_match("#$v+#", substr($word, 0, -1))) {
-            self::replace($word, 'y', 'i');
+            $this->replace($word, 'y', 'i');
         }
 
         return $word;
@@ -141,52 +135,52 @@ class PorterStemmer
      *
      * @param string $word Word to stem
      */
-    private static function step2($word)
+    private function step2($word)
     {
         switch (substr($word, -2, 1)) {
             case 'a':
-                self::replace($word, 'ational', 'ate', 0)
-                        OR self::replace($word, 'tional', 'tion', 0);
+                $this->replace($word, 'ational', 'ate', 0)
+                        OR $this->replace($word, 'tional', 'tion', 0);
                 break;
 
             case 'c':
-                self::replace($word, 'enci', 'ence', 0)
-                        OR self::replace($word, 'anci', 'ance', 0);
+                $this->replace($word, 'enci', 'ence', 0)
+                        OR $this->replace($word, 'anci', 'ance', 0);
                 break;
 
             case 'e':
-                self::replace($word, 'izer', 'ize', 0);
+                $this->replace($word, 'izer', 'ize', 0);
                 break;
 
             case 'g':
-                self::replace($word, 'logi', 'log', 0);
+                $this->replace($word, 'logi', 'log', 0);
                 break;
 
             case 'l':
-                self::replace($word, 'entli', 'ent', 0)
-                        OR self::replace($word, 'ousli', 'ous', 0)
-                        OR self::replace($word, 'alli', 'al', 0)
-                        OR self::replace($word, 'bli', 'ble', 0)
-                        OR self::replace($word, 'eli', 'e', 0);
+                $this->replace($word, 'entli', 'ent', 0)
+                        OR $this->replace($word, 'ousli', 'ous', 0)
+                        OR $this->replace($word, 'alli', 'al', 0)
+                        OR $this->replace($word, 'bli', 'ble', 0)
+                        OR $this->replace($word, 'eli', 'e', 0);
                 break;
 
             case 'o':
-                self::replace($word, 'ization', 'ize', 0)
-                        OR self::replace($word, 'ation', 'ate', 0)
-                        OR self::replace($word, 'ator', 'ate', 0);
+                $this->replace($word, 'ization', 'ize', 0)
+                        OR $this->replace($word, 'ation', 'ate', 0)
+                        OR $this->replace($word, 'ator', 'ate', 0);
                 break;
 
             case 's':
-                self::replace($word, 'iveness', 'ive', 0)
-                        OR self::replace($word, 'fulness', 'ful', 0)
-                        OR self::replace($word, 'ousness', 'ous', 0)
-                        OR self::replace($word, 'alism', 'al', 0);
+                $this->replace($word, 'iveness', 'ive', 0)
+                        OR $this->replace($word, 'fulness', 'ful', 0)
+                        OR $this->replace($word, 'ousness', 'ous', 0)
+                        OR $this->replace($word, 'alism', 'al', 0);
                 break;
 
             case 't':
-                self::replace($word, 'biliti', 'ble', 0)
-                        OR self::replace($word, 'aliti', 'al', 0)
-                        OR self::replace($word, 'iviti', 'ive', 0);
+                $this->replace($word, 'biliti', 'ble', 0)
+                        OR $this->replace($word, 'aliti', 'al', 0)
+                        OR $this->replace($word, 'iviti', 'ive', 0);
                 break;
         }
 
@@ -197,33 +191,33 @@ class PorterStemmer
      *
      * @param string $word String to stem
      */
-    private static function step3($word)
+    private function step3($word)
     {
         switch (substr($word, -2, 1)) {
             case 'a':
-                self::replace($word, 'ical', 'ic', 0);
+                $this->replace($word, 'ical', 'ic', 0);
                 break;
 
             case 's':
-                self::replace($word, 'alise', 'al', 0)
-                        OR self::replace($word, 'ness', '', 0);
+                $this->replace($word, 'alise', 'al', 0)
+                        OR $this->replace($word, 'ness', '', 0);
                 break;
 
             case 't':
-                self::replace($word, 'icate', 'ic', 0)
-                        OR self::replace($word, 'iciti', 'ic', 0);
+                $this->replace($word, 'icate', 'ic', 0)
+                        OR $this->replace($word, 'iciti', 'ic', 0);
                 break;
 
             case 'u':
-                self::replace($word, 'ful', '', 0);
+                $this->replace($word, 'ful', '', 0);
                 break;
 
             case 'v':
-                self::replace($word, 'ative', '', 0);
+                $this->replace($word, 'ative', '', 0);
                 break;
 
             case 'z':
-                self::replace($word, 'alize', 'al', 0);
+                $this->replace($word, 'alize', 'al', 0);
                 break;
         }
 
@@ -234,65 +228,65 @@ class PorterStemmer
      *
      * @param string $word Word to stem
      */
-    private static function step4($word)
+    private function step4($word)
     {
         switch (substr($word, -2, 1)) {
             case 'a':
-                self::replace($word, 'al', '', 1);
+                $this->replace($word, 'al', '', 1);
                 break;
 
             case 'c':
-                self::replace($word, 'ance', '', 1)
-                        OR self::replace($word, 'ence', '', 1);
+                $this->replace($word, 'ance', '', 1)
+                        OR $this->replace($word, 'ence', '', 1);
                 break;
 
             case 'e':
-                self::replace($word, 'er', '', 1);
+                $this->replace($word, 'er', '', 1);
                 break;
 
             case 'i':
-                self::replace($word, 'ic', '', 1);
+                $this->replace($word, 'ic', '', 1);
                 break;
 
             case 'l':
-                self::replace($word, 'able', '', 1)
-                        OR self::replace($word, 'ible', '', 1);
+                $this->replace($word, 'able', '', 1)
+                        OR $this->replace($word, 'ible', '', 1);
                 break;
 
             case 'n':
-                self::replace($word, 'ant', '', 1)
-                        OR self::replace($word, 'ement', '', 1)
-                        OR self::replace($word, 'ment', '', 1)
-                        OR self::replace($word, 'ent', '', 1);
+                $this->replace($word, 'ant', '', 1)
+                        OR $this->replace($word, 'ement', '', 1)
+                        OR $this->replace($word, 'ment', '', 1)
+                        OR $this->replace($word, 'ent', '', 1);
                 break;
 
             case 'o':
                 if (substr($word, -4) == 'tion' OR substr($word, -4) == 'sion') {
-                    self::replace($word, 'ion', '', 1);
+                    $this->replace($word, 'ion', '', 1);
                 } else {
-                    self::replace($word, 'ou', '', 1);
+                    $this->replace($word, 'ou', '', 1);
                 }
                 break;
 
             case 's':
-                self::replace($word, 'ism', '', 1);
+                $this->replace($word, 'ism', '', 1);
                 break;
 
             case 't':
-                self::replace($word, 'ate', '', 1)
-                        OR self::replace($word, 'iti', '', 1);
+                $this->replace($word, 'ate', '', 1)
+                        OR $this->replace($word, 'iti', '', 1);
                 break;
 
             case 'u':
-                self::replace($word, 'ous', '', 1);
+                $this->replace($word, 'ous', '', 1);
                 break;
 
             case 'v':
-                self::replace($word, 'ive', '', 1);
+                $this->replace($word, 'ive', '', 1);
                 break;
 
             case 'z':
-                self::replace($word, 'ize', '', 1);
+                $this->replace($word, 'ize', '', 1);
                 break;
         }
 
@@ -303,22 +297,22 @@ class PorterStemmer
      *
      * @param string $word Word to stem
      */
-    private static function step5($word)
+    private function step5($word)
     {
         // Part a
         if (substr($word, -1) == 'e') {
-            if (self::m(substr($word, 0, -1)) > 1) {
-                self::replace($word, 'e', '');
-            } else if (self::m(substr($word, 0, -1)) == 1) {
+            if ($this->m(substr($word, 0, -1)) > 1) {
+                $this->replace($word, 'e', '');
+            } else if ($this->m(substr($word, 0, -1)) == 1) {
 
-                if (!self::cvc(substr($word, 0, -1))) {
-                    self::replace($word, 'e', '');
+                if (!$this->cvc(substr($word, 0, -1))) {
+                    $this->replace($word, 'e', '');
                 }
             }
         }
 
         // Part b
-        if (self::m($word) > 1 AND self::doubleConsonant($word) AND substr($word, -1) == 'l') {
+        if ($this->m($word) > 1 AND $this->doubleConsonant($word) AND substr($word, -1) == 'l') {
             $word = substr($word, 0, -1);
         }
 
@@ -336,13 +330,13 @@ class PorterStemmer
      *                       of the $str string. True does not necessarily mean
      *                       that it was replaced.
      */
-    private static function replace(&$str, $check, $repl, $m = null)
+    private function replace(&$str, $check, $repl, $m = null)
     {
         $len = 0 - strlen($check);
 
         if (substr($str, $len) == $check) {
             $substr = substr($str, 0, $len);
-            if (is_null($m) OR self::m($substr) > $m) {
+            if (is_null($m) OR $this->m($substr) > $m) {
                 $str = $substr . $repl;
             }
 
@@ -366,10 +360,10 @@ class PorterStemmer
      * @param  string $str The string to return the m count for
      * @return int         The m count
      */
-    private static function m($str)
+    private function m($str)
     {
-        $c = self::$regex_consonant;
-        $v = self::$regex_vowel;
+        $c = $this->$regex_consonant;
+        $v = $this->$regex_vowel;
 
         $str = preg_replace("#^$c+#", '', $str);
         $str = preg_replace("#$v+$#", '', $str);
@@ -385,9 +379,9 @@ class PorterStemmer
      * @param  string $str String to check
      * @return bool        Result
      */
-    private static function doubleConsonant($str)
+    private function doubleConsonant($str)
     {
-        $c = self::$regex_consonant;
+        $c = $this->$regex_consonant;
 
         return preg_match("#$c{2}$#", $str, $matches) AND $matches[0]{0} == $matches[0]{1};
     }
@@ -397,10 +391,10 @@ class PorterStemmer
      * @param  string $str String to check
      * @return bool        Result
      */
-    private static function cvc($str)
+    private function cvc($str)
     {
-        $c = self::$regex_consonant;
-        $v = self::$regex_vowel;
+        $c = $this->$regex_consonant;
+        $v = $this->$regex_vowel;
 
         return preg_match("#($c$v$c)$#", $str, $matches)
                 AND strlen($matches[1]) == 3

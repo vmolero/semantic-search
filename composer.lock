@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "b7ae6e793440bf554d00d0973e411b0e",
-    "content-hash": "11fc5d6f0a13166898f2b6e78962d15d",
+    "hash": "7c1e39d9f099e7d1090dbb68cfdcfa20",
+    "content-hash": "4f7781efb34168b6f76c268be23c1be3",
     "packages": [
         {
             "name": "anlutro/curl",
@@ -2047,6 +2047,64 @@
                 "framework"
             ],
             "time": "2016-10-03 18:44:12"
+        },
+        {
+            "name": "thrace/datagrid-bundle",
+            "version": "v1.1.1",
+            "target-dir": "Thrace/DataGridBundle",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/thrace-project/datagrid-bundle.git",
+                "reference": "3dfd6585a37de93c13444dfb1797c6f64f650491"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/thrace-project/datagrid-bundle/zipball/3dfd6585a37de93c13444dfb1797c6f64f650491",
+                "reference": "3dfd6585a37de93c13444dfb1797c6f64f650491",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3",
+                "symfony/framework-bundle": "~2.3",
+                "symfony/options-resolver": "2.*",
+                "symfony/twig-bundle": "2.*"
+            },
+            "require-dev": {
+                "doctrine/doctrine-bundle": "1.*",
+                "doctrine/orm": "2.*",
+                "phpunit/phpunit": "3.7.*@dev",
+                "symfony/doctrine-bridge": "~2.3",
+                "thrace/component-bundle": "*"
+            },
+            "type": "symfony-bundle",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.1.*-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Thrace\\DataGridBundle": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nikolay Georgiev",
+                    "email": "symfonist@gmail.com"
+                }
+            ],
+            "description": "This bundle provides easy creating of jqGrid datagrids",
+            "keywords": [
+                "datagrid",
+                "jqgrid",
+                "jquery",
+                "symfony"
+            ],
+            "time": "2013-09-01 09:29:56"
         },
         {
             "name": "twig/twig",

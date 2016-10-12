@@ -4,9 +4,6 @@ parameters:
 #    parameter_name: value
 
 services:
-    CurlService:
-        class: anlutro\cURL\cURL
-    MorphAdornerService:
-        class: AppBundle\Services\MorphAdornerService
-#        arguments: ["@CurlService", "plain_value", "%parameter_name%"]
-        arguments: ["@CurlService"]
+#    service_name:
+#        class: AppBundle\Directory\ClassName
+#        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]

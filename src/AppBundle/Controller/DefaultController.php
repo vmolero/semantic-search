@@ -2,18 +2,12 @@
 
 namespace AppBundle\Controller;
 
-use anlutro\cURL\cURL;
-use anlutro\cURL\Response as cURLResponse;
 use AppBundle\Entity\Corpus;
 use AppBundle\Entity\Word;
 use AppBundle\VMolero\Semantic\PorterStemmer;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
-use DOMDocument;
-use DOMNodeList;
-use DOMXPath;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use stdClass;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -39,15 +33,22 @@ class DefaultController extends Controller
         return $this->render('default/review.html.twig', []);
     }
     /**
+     *
      * @Route("/parse", name="parse")
      * @param Request $request
      */
     public function parseAction(Request $request)
     {
-        $input = $request->get('review');
-        $words = $this->parseReview($input);
+        //$input = $request->get('review');
+        //$words = $this->parseReview($input);
+        //return new Response(implode('+', $words));
+        $word = 'happiest';
 
-        return new Response(implode('+', $words));
+        ob_start();
+        $lexicon = $this->getMorphAdornerService()->lexiconLookup($word);
+        print_r($lexicon);
+
+        return new Response(ob_get_clean());
     }
     /**
      *
@@ -121,94 +122,6 @@ class DefaultController extends Controller
             $em->persist($w);
             $em->flush();
         }
-
-        // $response = $curl->get($curl->buildUrl('http://classify.at.northwestern.edu/maserver/lemmatizer', ['corpusConfig' => 'eme', 'media' => 'json', 'spelling' => $word, 'standardize' => true, 'wordClass' => 'verb']));
-    }
-    /**
-     *
-     * @param type $url
-     * @param type $params
-     * @return type
-     */
-    private function connector($url, array $params)
-    {
-        // http://classify.at.northwestern.edu/maserver/lexiconlookup
-        $curl     = new cURL();
-        $curl->setDefaultHeaders([CURLOPT_TIMEOUT => 5]);
-        /** @var cURLResponse $response */
-        $response = $curl->get($curl->buildUrl($url, $params));
-        // $r        = ($response->toArray());
-        // $r['body'] = file_get_contents(realpath($this->container->getParameter('kernel.root_dir')) . '/Resources/test.xml');
-        return $response['body'];
-    }
-    /**
-     *
-     * @param type $word
-     * @return type
-     */
-    private function remoteLexiconLookup($word)
-    {
-        // http://classify.at.northwestern.edu/maserver/sentimentanalyzer
-        return $this->parseLemmas($this->connector('http://classify.at.northwestern.edu/maserver/lexiconlookup', ['corpusConfig' => 'eme', 'media' => 'xml', 'spelling' => $word]));
-    }
-    /**
-     *
-     * @param type $text
-     * @return type
-     */
-    private function remoteSentimentAnalysis($text)
-    {
-        // http://classify.at.northwestern.edu/maserver/sentimentanalyzer
-        return $this->parseSentimentResponse($this->connector('http://classify.at.northwestern.edu/maserver/sentimentanalyzer', ['includeInputText' => false, 'media' => 'xml', 'text' => $text]));
-    }
-    /**
-     *
-     * @param DOMNodeList $list
-     * @return type
-     */
-    private function XMLtoArray(DOMNodeList $list)
-    {
-        $array = [];
-        foreach ($list as $node) {
-            $array[] = $node->nodeValue;
-        }
-        return $array;
-    }
-    /**
-     *
-     * @param type $xml
-     * @return type
-     */
-    private function parseLemmas($xml)
-    {
-        $dom      = new DOMDocument();
-        $dom->loadXML($xml);
-        $xpath    = new DOMXPath($dom);
-        $indexes  = $this->XMLtoArray($xpath->query('//lemmata/entry/string[1]/text()'));
-        $values   = $this->XMLtoArray($xpath->query('//lemmata/entry/string[2]/text()'));
-        $tt       = array_combine($indexes, $values);
-        $indexes2 = $this->XMLtoArray($xpath->query('//categoriesAndCounts/entry/string[1]/text()'));
-        $counts   = $this->XMLtoArray($xpath->query('//mutableInteger/text()'));
-        $tt2      = array_combine($indexes2, $counts);
-        asort($tt2, SORT_NUMERIC);
-        $last     = end($tt2);
-        $lemma    = $tt[key($tt2)];
-        return $lemma;
-    }
-    /**
-     *
-     * @param type $xml
-     * @return type
-     */
-    private function parseSentimentResponse($xml)
-    {
-        $dom   = new DOMDocument();
-        $dom->loadXML($xml);
-        $xpath = new DOMXPath($dom);
-        return [
-            'feedback' => $xpath->query('//sentiment/text()')->item(0)->nodeValue,
-            'score' => floatval($xpath->query('//scode/text()')->item(0)->nodeValue)
-        ];
     }
     /**
      * @Route("/import", name="import")

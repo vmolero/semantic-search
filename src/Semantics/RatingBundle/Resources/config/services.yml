@@ -1,0 +1,8 @@
+services:
+    CurlService:
+        class: anlutro\cURL\cURL
+    StemmerService:
+        class: Semantics\Services\PorterStemmerService
+    MorphAdornerService:
+        class: Semantics\Services\MorphAdornerService
+        arguments: ["@CurlService", "@validator", @logger]
