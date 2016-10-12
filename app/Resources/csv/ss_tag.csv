@@ -1,0 +1,35 @@
+id,tag,class
+1,acp,adv/conj/pcl/prep
+2,an,noun
+3,av,adverb
+4,cc,conjunction
+5,crq,wh-word
+6,cs,conjunction
+7,d,determiner
+8,dt,determiner
+9,fo,foreign word
+10,fr,foreign word
+11,ge,foreign word
+12,gr,foreign word
+13,it,foreign word
+14,j,adjective
+15,jn,adjective
+16,jp,adjective
+17,la,foreign word
+18,n,noun
+19,np,noun
+20,nu,numeral
+21,pf,preposition
+22,pi,pronoun
+23,pn,pronoun
+24,po,pronoun
+25,pp,preposition
+26,pu,punctuation
+27,px,pronoun
+28,sy,symbol
+29,uh,interjection
+30,v,verb
+31,va,verb
+32,vm,verb
+33,xx,negative
+34,zz,undetermined

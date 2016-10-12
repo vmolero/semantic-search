@@ -1,0 +1,35 @@
+Name,Description,Major Class
+acp,adverb/conjunction/particle/preposition,adv/conj/pcl/prep
+an,adverb/noun,noun
+av,adverb,adverb
+cc,coordinating conjunction,conjunction
+crq,wh-word,wh-word
+cs,subordinating conjunction,conjunction
+d,determiner,determiner
+dt,article,determiner
+fo,foreign,foreign word
+fr,French,foreign word
+ge,German,foreign word
+gr,Greek,foreign word
+it,Italian,foreign word
+j,adjective,adjective
+jn,adjective/noun,adjective
+jp,proper adjective,adjective
+la,Latin,foreign word
+n,noun,noun
+np,proper noun,noun
+nu,numeral,numeral
+pf,"preposition ""of""",preposition
+pi,indefinite pronoun,pronoun
+pn,personal pronoun,pronoun
+po,possessive pronoun,pronoun
+pp,preposition,preposition
+pu,punctuation,punctuation
+px,reflexive pronoun,pronoun
+sy,symbol,symbol
+uh,interjection,interjection
+v,verb,verb
+va,auxiliary verb,verb
+vm,modal verb,verb
+xx,negative,negative
+zz,undetermined,undetermined

@@ -222,30 +222,26 @@ class DefaultController extends Controller
         ob_start();
         fgetcsv($file, 1000);
         while ($line = fgetcsv($file, 1000)) {
-            // 1 id
-            // 2 Text
-            // 4 (Score or Null)
-
-            /* $query = $em->createQuery('INSERT  FROM AppBundle:Review');
-
-              $r     = $query->getResult();
-              $words = $this->parseReview($line[2]);
-
-              $product = new Corpus();
-              $product->setStem($stem);
-              $product->setPrice(19.99);
-              $product->setDescription('Ergonomic and stylish!');
-
-              $em = $this->getDoctrine()->getManager();
-
-              // tells Doctrine you want to (eventually) save the Product (no queries yet)
-              $em->persist($product);
-
-              // actually executes the queries (i.e. the INSERT query)
-              $em->flush();
-             */
-            echo implode('::', $words) . '<br>';
-            die;
+            if (strlen($line[2]) > 0) {
+                $entry = new Corpus();
+                $entry->setStem(trim($line[2]));
+                $entry->setLemma($this->remoteLexiconLookup($line[2]));
+                $entry->setPrescore($this->remoteSentimentAnalysis($line[2]));
+                $entry->setFeedback(1);
+                $em->persist($entry);
+                $em->flush();
+                print_r($entry->toArray());
+            }
+            if (strlen($line[3]) > 0) {
+                $entry = new Corpus();
+                $entry->setStem(trim($line[3]));
+                $entry->setLemma($this->remoteLexiconLookup($line[3]));
+                $entry->setPrescore($this->remoteSentimentAnalysis($line[3]));
+                $entry->setFeedback(0);
+                $em->persist($entry);
+                $em->flush();
+                print_r($entry->toArray());
+            }
         }
         return new Response(ob_get_clean());
     }
