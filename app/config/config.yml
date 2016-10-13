@@ -66,3 +66,6 @@ swiftmailer:
     username:  "%mailer_user%"
     password:  "%mailer_password%"
     spool:     { type: memory }
+
+thrace_data_grid:
+    translation_domain: ThraceDataGridBundle

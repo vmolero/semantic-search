@@ -3,14 +3,15 @@
 namespace Semantics\RatingBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Semantics\RatingBundle\Repository\ExpressionWordRepository;
 
 /**
  * ReviewWord
  *
- * @ORM\Table(name="review_word")
- * @ORM\Entity(repositoryClass="Semantics\RatingBundle\Repository\ReviewWordRepository")
+ * @ORM\Table(name="ss_expression_word")
+ * @ORM\Entity(repositoryClass="ExpressionWordRepository")
  */
-class ReviewWord
+class ReviewWord extends Entity
 {
     /**
      * @var int
@@ -20,32 +21,28 @@ class ReviewWord
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
-
     /**
      * @var int
      *
      * @ORM\Column(name="word_id", type="integer")
      */
     private $wordId;
-
     /**
      * @var int
      *
-     * @ORM\Column(name="review_id", type="integer")
+     * @ORM\Column(name="expression_id", type="integer")
      */
-    private $reviewId;
-
+    private $expressionId;
 
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
         return $this->id;
     }
-
     /**
      * Set wordId
      *
@@ -58,37 +55,26 @@ class ReviewWord
 
         return $this;
     }
-
     /**
      * Get wordId
      *
-     * @return integer 
+     * @return integer
      */
     public function getWordId()
     {
         return $this->wordId;
     }
-
-    /**
-     * Set reviewId
-     *
-     * @param integer $reviewId
-     * @return ReviewWord
-     */
-    public function setReviewId($reviewId)
+    public function getExpressionId()
     {
-        $this->reviewId = $reviewId;
-
+        return $this->expressionId;
+    }
+    public function setExpressionId($expressionId)
+    {
+        $this->expressionId = $expressionId;
         return $this;
     }
-
-    /**
-     * Get reviewId
-     *
-     * @return integer 
-     */
-    public function getReviewId()
+    public function setId($id)
     {
-        return $this->reviewId;
+        $this->id = $id;
     }
 }

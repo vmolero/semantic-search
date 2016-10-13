@@ -3,16 +3,17 @@
 namespace Semantics\RatingBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Semantics\RatingBundle\Repository\CorpusRepository;
 
 /**
  * Description of Corpus
  *
  * @author Víctor Molero
  *
- * @ORM\Entity(repositoryClass="Semantics\RatingBundle\Repository\CorpusRepository")
+ * @ORM\Entity(repositoryClass="CorpusRepository")
  * @ORM\Table(name="ss_corpus")
  */
-final class Corpus
+final class Corpus extends Entity
 {
     /**
      * @ORM\Id
@@ -31,11 +32,15 @@ final class Corpus
     /**
      * @ORM\Column(type="float")
      */
-    private $prescore;
+    private $score;
     /**
      * @ORM\Column(type="integer")
      */
     private $feedback;
+    /**
+     * @ORM\Column(type="string")
+     */
+    private $class;
 
     public function getId()
     {
@@ -45,10 +50,6 @@ final class Corpus
     {
         return $this->stem;
     }
-    public function getPrescore()
-    {
-        return $this->prescore;
-    }
     public function getLemma()
     {
         return $this->lemma;
@@ -56,6 +57,24 @@ final class Corpus
     public function getFeedback()
     {
         return $this->feedback;
+    }
+    public function getScore()
+    {
+        return $this->score;
+    }
+    public function getClass()
+    {
+        return $this->class;
+    }
+    public function setScore($score)
+    {
+        $this->score = $score;
+        return $this;
+    }
+    public function setClass($class)
+    {
+        $this->class = $class;
+        return $this;
     }
     public function setFeedback($feedback)
     {
@@ -76,18 +95,5 @@ final class Corpus
     {
         $this->stem = $stem;
         return $this;
-    }
-    public function setPrescore($prescore)
-    {
-        $this->prescore = $prescore;
-        return $this;
-    }
-    public function toArray()
-    {
-        return ['id' => $this->getId(), 'stem' => $this->getStem(), 'lemma' => $this->getLemma(), 'prescore' => $this->getPrescore()];
-    }
-    public function __toString()
-    {
-        return json_encode($this->toArray());
     }
 }

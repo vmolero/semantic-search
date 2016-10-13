@@ -2,29 +2,41 @@
 
 namespace Semantics\RatingBundle\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
+// use Doctrine\Common\Collections\ArrayCollection;
+
 /**
- * Description of Review
+ * Description of Word
  *
  * @author Víctor Molero
- *
  * @ORM\Entity
- * @ORM\Table(name="ss_review")
+ * @ORM\Table(name="ss_expression")
  */
-final class Review extends Entity
+final class Expression extends Entity
 {
     /**
+     * @var integer
+     *
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
     private $id;
     /**
+     * @var string
+     *
      * @ORM\Column(type="string")
      */
-    private $review;
+    private $expression;
+    /**
+     * @var integer
+     *
+     * @ORM\Column(type="integer")
+     * @ORM\ManyToOne(targetEntity="Semantics\RatingBundle\Entity\Review")
+     * @ORM\JoinColumn(name="review_id", referencedColumnName="id")
+     */
+    private $reviewId;
     /**
      * @ORM\Column(type="float")
      */
@@ -42,23 +54,21 @@ final class Review extends Entity
      */
     private $negativeCount;
 
-    /**
-     * @var ArrayCollection
-     *
-     * @ORM\OneToMany(targetEntity="Word", mappedBy="ss_review")
-
-      private $words; */
     public function __construct()
     {
-        // $this->words = new ArrayCollection();
+        // $this->reviews = new ArrayCollection();
     }
     public function getId()
     {
         return $this->id;
     }
-    public function getReview()
+    public function getExpression()
     {
-        return $this->review;
+        return $this->expression;
+    }
+    public function getReviewId()
+    {
+        return $this->reviewId;
     }
     public function getScore()
     {
@@ -76,6 +86,31 @@ final class Review extends Entity
     {
         return $this->negativeCount;
     }
+    public function setId($id)
+    {
+        $this->id = $id;
+        return $this;
+    }
+    public function setExpression($expression)
+    {
+        $this->expression = $expression;
+        return $this;
+    }
+    public function setReviewId($reviewId)
+    {
+        $this->reviewId = $reviewId;
+        return $this;
+    }
+    public function setScore($score)
+    {
+        $this->score = $score;
+        return $this;
+    }
+    public function setFeedback($feedback)
+    {
+        $this->feedback = $feedback;
+        return $this;
+    }
     public function setPositiveCount($positiveCount)
     {
         $this->positiveCount = $positiveCount;
@@ -84,26 +119,6 @@ final class Review extends Entity
     public function setNegativeCount($negativeCount)
     {
         $this->negativeCount = $negativeCount;
-        return $this;
-    }
-    public function setFeedback($feedback)
-    {
-        $this->feedback = $feedback;
-        return $this;
-    }
-    public function setId($id)
-    {
-        $this->id = $id;
-        return $this;
-    }
-    public function setReview($review)
-    {
-        $this->review = $review;
-        return $this;
-    }
-    public function setScore($score)
-    {
-        $this->score = $score;
         return $this;
     }
 }

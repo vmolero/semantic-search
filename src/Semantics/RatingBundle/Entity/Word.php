@@ -11,9 +11,9 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @author Víctor Molero
  * @ORM\Entity
- * @ORM\Table(name="ss_corpus")
+ * @ORM\Table(name="ss_word")
  */
-final class Word
+final class Word extends Entity
 {
     /**
      * @var integer
@@ -43,8 +43,8 @@ final class Word
      *
      * ORM\ManyToOne(targetEntity="Semantics\RatingBundle\Entity\Review" inversedBy="ss_word")
      * ORM\JoinTable(name="ss_word_review",
-     *      joinColumns={@JoinColumn(name="word_id", referencedColumnName="id")},
-     *      inverseJoinColumns={@JoinColumn(name="friend_user_id", referencedColumnName="id")})
+     *      joinColumns={@ORM\JoinColumn(name="word_id", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="friend_user_id", referencedColumnName="id")})
 
       private $reviews; */
     public function __construct()
@@ -77,13 +77,5 @@ final class Word
     {
         $this->corpusId = $corpusId;
         return $this;
-    }
-    public function toArray()
-    {
-        return ['id' => $this->getId(), 'word' => $this->getWord(), 'corpusId' => $this->getCorpusId()];
-    }
-    public function __toString()
-    {
-        return json_encode($this->toArray());
     }
 }

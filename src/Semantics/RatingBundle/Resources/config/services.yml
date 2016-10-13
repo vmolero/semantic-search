@@ -5,4 +5,6 @@ services:
         class: Semantics\RatingBundle\Services\PorterStemmerService
     MorphAdornerService:
         class: Semantics\RatingBundle\Services\MorphAdornerService
-        arguments: ["@CurlService", "@validator", @logger]
+        arguments: ["@CurlService", "@logger"]
+    RepositoryBuilderService:
+        class: Semantics\RatingBundle\Services\RepositoryBuilderService
