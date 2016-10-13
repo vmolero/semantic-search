@@ -1,0 +1,22 @@
+{
+  "name": "semantic-search",
+  "homepage": "https://github.com/vmolero/semantic-search",
+  "authors": [
+    "Victor Molero <victor.molero@gmail.com>"
+  ],
+  "description": "Trivago Challenge",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^3.1.1",
+    "jqGrid": "^5.1.1",
+    "bootstrap": "^3.3.7"
+  }
+}

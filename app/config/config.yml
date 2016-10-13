@@ -69,3 +69,8 @@ swiftmailer:
 
 thrace_data_grid:
     translation_domain: ThraceDataGridBundle
+assetic:
+    debug:          '%kernel.debug%'
+    use_controller: '%kernel.debug%'
+    filters:
+        cssrewrite: ~

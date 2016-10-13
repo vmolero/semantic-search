@@ -38,18 +38,9 @@ final class Word extends Entity
      */
     private $corpusId;
 
-    /**
-     * var ArrayCollection
-     *
-     * ORM\ManyToOne(targetEntity="Semantics\RatingBundle\Entity\Review" inversedBy="ss_word")
-     * ORM\JoinTable(name="ss_word_review",
-     *      joinColumns={@ORM\JoinColumn(name="word_id", referencedColumnName="id")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="friend_user_id", referencedColumnName="id")})
-
-      private $reviews; */
     public function __construct()
     {
-        // $this->reviews = new ArrayCollection();
+
     }
     public function getId()
     {

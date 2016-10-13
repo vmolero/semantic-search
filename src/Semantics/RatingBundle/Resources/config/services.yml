@@ -8,3 +8,11 @@ services:
         arguments: ["@CurlService", "@logger"]
     RepositoryBuilderService:
         class: Semantics\RatingBundle\Services\RepositoryBuilderService
+    app.datagrid.builder.topic_management:
+        class: Semantics\RatingBundle\Services\Datagrid\TopicManagementBuilder
+        arguments: ["@thrace_data_grid.factory.datagrid", "@translator", "@router", "@doctrine.orm.entity_manager"]
+    app.datagrid.topic_management:
+        class: Thrace\DataGridBundle\DataGrid\DataGrid
+        factory: ['@app.datagrid.builder.topic_management', build]
+        tags:
+            - { name: thrace_data_grid.datagrid, alias: topic_management }

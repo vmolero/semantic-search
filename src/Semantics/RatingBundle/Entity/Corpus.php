@@ -30,7 +30,7 @@ final class Corpus extends Entity
      */
     private $lemma;
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="decimal", precision=5, scale=2, nullable=false, options={"default" : 0})
      */
     private $score;
     /**

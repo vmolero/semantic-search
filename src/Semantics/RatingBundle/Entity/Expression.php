@@ -38,7 +38,7 @@ final class Expression extends Entity
      */
     private $reviewId;
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="decimal", precision=5, scale=2, nullable=false, options={"default" : 0})
      */
     private $score;
     /**
@@ -46,7 +46,7 @@ final class Expression extends Entity
      */
     private $feedback;
     /**
-     * @ORM\Column(type="float", name="positiveCount")
+     * @ORM\Column(type="integer", name="positiveCount")
      */
     private $positiveCount;
     /**

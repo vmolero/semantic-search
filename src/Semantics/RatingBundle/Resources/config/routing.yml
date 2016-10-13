@@ -4,6 +4,12 @@ rating_homepage:
 review_index:
     path:     /review
     defaults: { _controller: RatingBundle:Review:index }
+review_ajax_fetchall:
+    path:     /ajax/review/
+    defaults: { _controller: RatingBundle:Review:ajaxfetchall }
 criteria_index:
     path:     /criteria
     defaults: { _controller: RatingBundle:Criteria:index }
+criteria_ajax_fetchall:
+    path:     /ajax/criteria/
+    defaults: { _controller: RatingBundle:Criteria:ajaxfetchall }

@@ -11,7 +11,7 @@ use Semantics\RatingBundle\Repository\ExpressionWordRepository;
  * @ORM\Table(name="ss_expression_word")
  * @ORM\Entity(repositoryClass="ExpressionWordRepository")
  */
-class ReviewWord extends Entity
+class ExpressionWord extends Entity
 {
     /**
      * @var int
@@ -25,12 +25,14 @@ class ReviewWord extends Entity
      * @var int
      *
      * @ORM\Column(name="word_id", type="integer")
+     * @ORM\ManyToOne(targetEntity="Semantics\RatingBundle\Entity\Expression", inversedBy="ss_expression", cascade={"all"})
      */
     private $wordId;
     /**
      * @var int
      *
      * @ORM\Column(name="expression_id", type="integer")
+     * @ORM\ManyToOne(targetEntity="Semantics\RatingBundle\Entity\Word", inversedBy="ss_word", cascade={"all"})
      */
     private $expressionId;
 
