@@ -15,23 +15,37 @@ use Semantics\RatingBundle\Interfaces\StrategyDigestor;
  */
 final class ReviewAnalyzer implements StrategyDigestor
 {
-    private $review;
+    /**
+     *
+     * @var RepositoryBuilder
+     */
+    private $builder;
+    /**
+     *
+     * @var MorphAdorner
+     */
+    private $morph;
 
     const WINDOW_SIZE = 4;
 
+    public function __construct(MorphAdorner $morph, RepositoryBuilder $builder)
+    {
+        $this->builder = $builder;
+        $this->morph   = $morph;
+    }
     public function digest(SemanticEntityHolder $review)
     {
-        die("Analize");
-        $this->analyze($review);
+        return $this->analyze($review);
     }
-    protected function createTopicRegExpr($topics)
+    private function createTopicRegExpr($topics)
     {
         return '/(' . implode('|', $topics) . ')/';
     }
-    public function analyze(SemanticEntityHolder $review)
+    private function analyze(SemanticEntityHolder $review)
     {
+        print_r($review->toArray());
+        die;
         array_walk($review->getExpressions()->getValues(), function (SemanticEntityHolder &$exprEntity) {
-
             /** @var Expression $exprEntity */
             $subordinates = preg_split('/[,;]+/', $exprEntity->getExpression());
             $partials     = [];
@@ -46,14 +60,14 @@ final class ReviewAnalyzer implements StrategyDigestor
 
             if (!empty($partials)) {
                 $exprEntity->setFragments(array_map(function ($partial) {
-                            return $this->builder->create(Expression::class)->build(['word' => $word])->getConcrete();
+                            return $this->builder->create(Expression::class)->build(['word' => $partial])->getConcrete();
                         }, $partials));
             }
         });
 
         return $review;
     }
-    protected function tokenizeSentence($sentence)
+    private function tokenizeSentence($sentence)
     {
         return array_map(function($word) {
 
@@ -63,7 +77,7 @@ final class ReviewAnalyzer implements StrategyDigestor
             return $wordEntity;
         }, preg_split('/[\s]+/', trim($sentence)));
     }
-    public function selectHighestWithNounAndAdjective(array $ngramResult)
+    private function selectHighestWithNounAndAdjective(array $ngramResult)
     {
         $maxPositive      = null;
         $maxPositiveScore = 0;
@@ -87,7 +101,7 @@ final class ReviewAnalyzer implements StrategyDigestor
             return $this->builder->create(Expression::class)->build($finalResult)->getConcrete();
         }
     }
-    protected function ngramSentenceParser(array $tokens, $window)
+    private function ngramSentenceParser(array $tokens, $window)
     {
         $break     = false;
         $resultSet = [];

@@ -13,6 +13,7 @@ services:
         arguments: ["@Doctrine", "@MorphAdorner", "@RepositoryBuilder", "@logger"]
     ReviewAnalyzer:
         class: Semantics\RatingBundle\Services\ReviewAnalyzer
+        arguments: ["@MorphAdorner","@RepositoryBuilder"]
     SemanticApp:
         class: Semantics\RatingBundle\Services\SemanticApp
         arguments: ["@DoctrinePersister", "@ReviewAnalyzer"]

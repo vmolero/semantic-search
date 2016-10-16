@@ -69,6 +69,7 @@ class Expression extends SemanticEntity
      * @ORM\JoinColumn(name="review_id", referencedColumnName="id")
      */
     private $review;
+    protected $methodRenderPatterns = ['/(?!(^getReview$|^getSentence$))^get[a-zA-Z]+$/'];
 
     public function __construct()
     {

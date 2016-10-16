@@ -23,11 +23,13 @@ use Semantics\RatingBundle\Interfaces\Serializable;
  */
 abstract class SemanticEntity implements SemanticEntityHolder, Clonable, Serializable
 {
+    protected $methodRenderPatterns = ['/^get[a-zA-Z]+$/'];
+
     abstract public function getId();
     public function copy(Clonable $copyFrom)
     {
         if (get_class($this) == get_class($copyFrom)) {
-            $me      = new ReflectionClass($this);
+
             $methods = array_filter($me->getMethods(ReflectionMethod::IS_PUBLIC), function (ReflectionMethod $method) {
                 return preg_match('/^[sg]etId$/', $method->getName()) != 1 && preg_match('/^set[a-zA-Z]+$/', $method->getName());
             });
@@ -41,22 +43,34 @@ abstract class SemanticEntity implements SemanticEntityHolder, Clonable, Seriali
     }
     public function toArray()
     {
-        $me      = new ReflectionClass($this);
-        $methods = array_filter($me->getMethods(ReflectionMethod::IS_PUBLIC), function (ReflectionMethod $method) {
-            return preg_match('/^get[a-zA-Z]+$/', $method->getName());
-        });
-        $array = [];
+        $methods = $this->filterMethods($this->methodRenderPatterns);
+        $array   = [];
         foreach ($methods as $method) {
             $value = $method->invoke($this);
             if ($value instanceof Collection) {
-                $value = array_map(function (SemanticEntityHolder $entity) {
+                $value = $value->getValues();
+            }
+            if (is_array($value)) {
+                $value = array_map(function (Serializable $entity) {
                     return $entity->toArray();
-                }, $value->getValues());
+                }, $value);
             }
             /* @var $method ReflectionMethod */
             $array[lcfirst(preg_replace('/^get/', '', $method->getName()))] = $value;
         }
         return $array;
+    }
+    protected function filterMethods(array $patterns)
+    {
+        $me = new ReflectionClass($this);
+        return array_filter($me->getMethods(ReflectionMethod::IS_PUBLIC), function (ReflectionMethod $method) use ($patterns) {
+            $match   = true;
+            $patt    = array_values($patterns);
+            while (($pattern = array_shift($patt)) && $match) {
+                $match = (preg_match($pattern, $method->getName()) === 1);
+            }
+            return $match;
+        });
     }
     public function __toString()
     {
