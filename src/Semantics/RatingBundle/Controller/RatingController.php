@@ -5,7 +5,7 @@ namespace Semantics\RatingBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing as RTG;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration as RTG;
 
 /**
  * @RTG\Route("/rate")

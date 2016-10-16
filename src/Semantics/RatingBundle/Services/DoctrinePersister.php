@@ -7,8 +7,8 @@ use Semantics\RatingBundle\Entity\Expression;
 use Semantics\RatingBundle\Entity\Review;
 use Semantics\RatingBundle\Entity\Topic;
 use Semantics\RatingBundle\Entity\Word;
+use Semantics\RatingBundle\Interfaces\ReviewPersister;
 use Semantics\RatingBundle\Interfaces\SemanticEntityHolder;
-use Semantics\RatingBundle\Interfaces\PersistableReview;
 use Semantics\RatingBundle\Services\MorphAdornerService;
 use Semantics\RatingBundle\Services\RepositoryBuilderService;
 use Symfony\Bridge\Doctrine\RegistryInterface;
@@ -16,11 +16,11 @@ use Symfony\Bridge\Monolog\Logger;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Description of AverageDifference
+ * Description of DoctrinePersister
  *
  * @author Víctor Molero
  */
-final class DoctrinePersister implements PersistableReview
+final class DoctrinePersister implements ReviewPersister
 {
     /**
      *
@@ -29,12 +29,12 @@ final class DoctrinePersister implements PersistableReview
     protected $doctrine;
     /**
      *
-     * @var MorphAdornerService
+     * @var MorphAdorner
      */
     protected $morph;
     /**
      *
-     * @var RepositoryBuilderService
+     * @var RepositoryBuilder
      */
     protected $builder;
     /**
@@ -49,7 +49,7 @@ final class DoctrinePersister implements PersistableReview
      * @param MorphAdornerService $morph
      * @param RepositoryBuilderService $builder
      */
-    public function __construct(RegistryInterface $orm, MorphAdornerService $morph, RepositoryBuilderService $builder, Logger $logger)
+    public function __construct(RegistryInterface $orm, MorphAdorner $morph, RepositoryBuilder $builder, Logger $logger)
     {
         $this->doctrine = $orm;
         $this->morph    = $morph;
@@ -59,14 +59,12 @@ final class DoctrinePersister implements PersistableReview
     public function initReview($review)
     {
         $score        = $this->morph->sentimentAnalyzer($review);
-        $this->entity = $this->builder->create(Review::class)->build(['review' => $review, 'hash' => md5($review)] + $score)->getConcrete();
-        $this->entity->setLines(array_map(function($line) {
+        $this->review = $this->builder->create(Review::class)->build(['review' => $review, 'hash' => md5($review)] + $score)->getConcrete();
+        $this->review->setLines(array_map(function($line) {
                     $lineEntity = $this->parseExpression($this->cleanup($line), $this->review);
                     return $lineEntity;
-                }, $this->split($this->entity->getReview())));
-        $this->entity->setTopics(array_map(function (SemanticEntityHolder $topic) {
-                    return $topic->getTopic();
-                }, $this->doctrine->getRepository('RatingBundle:Topic')->findAll()));
+                }, $this->split($this->review->getReview())));
+        $this->review->setTopics($this->doctrine->getRepository('RatingBundle:Topic')->findAll());
         return $this;
     }
     public function saveReview($review)
@@ -89,7 +87,7 @@ final class DoctrinePersister implements PersistableReview
     private function saveEntity(SemanticEntityHolder $review)
     {
         $myReviewEntity = $this->doctrine->getRepository('RatingBundle:Review')->findOneBy(['hash' => $review->getHash()]);
-        if (!$myReviewEntity instanceof IEntity) {
+        if (!$myReviewEntity instanceof SemanticEntityHolder) {
             $this->doctrine->getManager()->persist($review);
         } else {
             $myReviewEntity->copy($review);
@@ -100,10 +98,10 @@ final class DoctrinePersister implements PersistableReview
     /**
      *
      * @param string $expression
-     * @param IEntity $reviewEntity
-     * @param IEntity $lineEntity
+     * @param SemanticEntityHolder $reviewEntity
+     * @param SemanticEntityHolder $lineEntity
      * @param array $score
-     * @return IEntity
+     * @return SemanticEntityHolder
      */
     private function parseExpression($expression, SemanticEntityHolder $reviewEntity, SemanticEntityHolder $lineEntity = null, array $score = [])
     {

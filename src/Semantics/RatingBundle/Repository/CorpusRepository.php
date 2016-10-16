@@ -18,8 +18,8 @@ class CorpusRepository extends EntityRepository
     /**
      *
      * @param RegistryInterface $orm
-     * @param IEntity $corpusEntity
-     * @return IEntity
+     * @param SemanticEntityHolder $corpusEntity
+     * @return SemanticEntityHolder
      */
     public function save(RegistryInterface $orm, SemanticEntityHolder $corpusEntity)
     {

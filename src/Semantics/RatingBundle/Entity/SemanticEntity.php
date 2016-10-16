@@ -24,7 +24,7 @@ use Semantics\RatingBundle\Interfaces\Serializable;
 abstract class SemanticEntity implements SemanticEntityHolder, Clonable, Serializable
 {
     abstract public function getId();
-    public function copy(SemanticEntityHolder $copyFrom)
+    public function copy(Clonable $copyFrom)
     {
         if (get_class($this) == get_class($copyFrom)) {
             $me      = new ReflectionClass($this);

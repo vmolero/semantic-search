@@ -18,13 +18,13 @@ class ExpressionRepository extends EntityRepository
      *
      *
      * @param RegistryInterface $orm
-     * @param IEntity $entity
-     * @return IEntity
+     * @param SemanticEntityHolder $entity
+     * @return SemanticEntityHolder
      */
     public function save(RegistryInterface $orm, SemanticEntityHolder $entity)
     {
         $existingEntity = $this->findOneBy(['reviewId' => $entity->getReviewId(), 'hash' => $entity->getHash()]);
-        if (!$existingEntity instanceof IEntity) {
+        if (!$existingEntity instanceof SemanticEntityHolder) {
             $orm->getManager()->persist($entity);
             $orm->getManager()->flush();
             return $entity;

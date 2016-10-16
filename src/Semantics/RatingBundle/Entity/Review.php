@@ -49,10 +49,24 @@ final class Review extends SemanticEntity
      * @ORM\OneToMany(targetEntity="Expression", mappedBy="review", cascade={"persist"}, orphanRemoval=true)
      */
     private $lines;
+    /**
+     * @var ArrayCollection
+     */
+    private $topics;
 
     public function __construct()
     {
-        $this->lines = new ArrayCollection();
+        $this->lines  = new ArrayCollection();
+        $this->topics = new ArrayCollection();
+    }
+    public function getTopics()
+    {
+        return $this->topics;
+    }
+    public function setTopics($topics)
+    {
+        $this->topics = $topics;
+        return $this;
     }
     public function getLines()
     {

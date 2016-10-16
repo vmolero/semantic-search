@@ -14,6 +14,5 @@ namespace Semantics\RatingBundle\Interfaces;
  */
 interface SemanticEntityHolder
 {
-    public function copy();
-    public function toArray();
+    public function getId();
 }

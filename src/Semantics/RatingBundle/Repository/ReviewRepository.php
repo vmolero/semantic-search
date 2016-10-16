@@ -18,8 +18,8 @@ class ReviewRepository extends EntityRepository
      *
      *
      * @param RegistryInterface $orm
-     * @param IEntity $entity
-     * @return IEntity
+     * @param SemanticEntityHolder $entity
+     * @return SemanticEntityHolder
      */
     public function save(RegistryInterface $orm, SemanticEntityHolder $entity)
     {
@@ -28,7 +28,7 @@ class ReviewRepository extends EntityRepository
         return $entity;
         $matches        = $this->findBy(['hash' => $entity->getHash()]);
         $existingEntity = array_shift($matches);
-        if (!$existingEntity instanceof IEntity) {
+        if (!$existingEntity instanceof SemanticEntityHolder) {
             $orm->getManager()->persist($entity);
             $orm->getManager()->flush();
             return $entity;

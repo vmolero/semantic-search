@@ -8,5 +8,5 @@ namespace Semantics\RatingBundle\Interfaces;
  */
 interface Clonable
 {
-    public function copy();
+    public function copy(Clonable $entity);
 }

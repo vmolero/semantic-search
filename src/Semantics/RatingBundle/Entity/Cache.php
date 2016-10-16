@@ -51,4 +51,8 @@ class Cache implements SemanticEntityHolder
     {
         return [$this->key => $this->value];
     }
+    public function copy(Clonable $clonable)
+    {
+        
+    }
 }

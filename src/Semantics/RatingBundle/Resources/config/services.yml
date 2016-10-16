@@ -10,12 +10,12 @@ services:
         class: Semantics\RatingBundle\Services\RepositoryBuilder
     DoctrinePersister:
         class: Semantics\RatingBundle\Services\DoctrinePersister
-        arguments: ["@Doctrine, "@MorphAdorner", "@RepositoryBuilder", "@logger"]
+        arguments: ["@Doctrine", "@MorphAdorner", "@RepositoryBuilder", "@logger"]
     ReviewAnalyzer:
         class: Semantics\RatingBundle\Services\ReviewAnalyzer
     SemanticApp:
-        class: Semantics\RatingBundle\Domain\SemanticApp
-        arguments: ["@DoctrinePersister, "@ReviewAnalyzer"]
+        class: Semantics\RatingBundle\Services\SemanticApp
+        arguments: ["@DoctrinePersister", "@ReviewAnalyzer"]
     app.datagrid.builder.topic_management:
         class: Semantics\RatingBundle\Services\Datagrid\TopicManagementBuilder
         arguments: ["@thrace_data_grid.factory.datagrid", "@translator", "@router", "@doctrine.orm.entity_manager"]

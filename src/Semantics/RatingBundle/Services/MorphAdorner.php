@@ -8,7 +8,6 @@ use DOMNodeList;
 use DOMXPath;
 use Exception;
 use Semantics\RatingBundle\Entity\Cache;
-use Semantics\RatingBundle\Interfaces\SemanticEntityHolder;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Bridge\Monolog\Logger;
 
@@ -36,7 +35,7 @@ final class MorphAdorner
     private $logger;
     /**
      *
-     * @var PorterStemmerService
+     * @var PorterStemmer
      */
     private $stemmer;
     /**
@@ -49,7 +48,7 @@ final class MorphAdorner
      *
      * @param cURL $curl
      */
-    public function __construct(RegistryInterface $orm, cURL $curl, PorterStemmerService $stemmer, Logger $logger)
+    public function __construct(RegistryInterface $orm, cURL $curl, PorterStemmer $stemmer, Logger $logger)
     {
         $this->curl     = $curl;
         $this->logger   = $logger;
@@ -115,7 +114,7 @@ final class MorphAdorner
             return self::$cache[$key];
         } catch (Exception $ignore) {
             $cached = $this->doctrine->getRepository('RatingBundle:Cache')->findOneBy(['key' => $key]);
-            if ($cached instanceof IEntity) {
+            if ($cached instanceof SemanticEntityHolder) {
                 return json_decode($cached->getValue(), true);
             }
             throw new Exception("Key not found");
@@ -126,7 +125,7 @@ final class MorphAdorner
         $em     = $this->doctrine->getManager();
         $this->logger->debug("Cache set($key): " . json_encode($value));
         $cached = $this->doctrine->getRepository('RatingBundle:Cache')->findOneBy(['key' => $key]);
-        if (!$cached instanceof IEntity) {
+        if (!$cached instanceof Cache) {
             $cached = (new Cache())->setKey($key);
             $em->persist($cached);
         }

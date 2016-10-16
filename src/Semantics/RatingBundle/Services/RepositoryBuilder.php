@@ -13,21 +13,21 @@ final class RepositoryBuilder
 {
     /**
      *
-     * @var IEntity
+     * @var SemanticEntityHolder
      */
     private $entity;
 
     public function create($className)
     {
         $entity = new $className();
-        if ($entity instanceof IEntity) {
+        if ($entity instanceof SemanticEntityHolder) {
             $this->entity = $entity;
         }
         return $this;
     }
     public function build(array $setters)
     {
-        if ($this->entity instanceof IEntity) {
+        if ($this->entity instanceof SemanticEntityHolder) {
             foreach ($setters as $name => $value) {
                 if (method_exists($this->entity, 'set' . ucfirst($name))) {
                     $this->entity->{'set' . ucfirst($name)}($value);
