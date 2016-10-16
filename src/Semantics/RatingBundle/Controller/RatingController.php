@@ -3,11 +3,28 @@
 namespace Semantics\RatingBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing as RTG;
 
+/**
+ * @RTG\Route("/rate")
+ */
 class RatingController extends Controller
 {
-    public function indexAction()
+    /**
+     * @RTG\Route("/review")
+     * @RTG\Method({"post"})
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function reviewAction(Request $request)
     {
-        return $this->render('RatingBundle:Rating:index.html.twig', ['base_dir' => realpath($this->container->getParameter('kernel.root_dir') . '/..') . DIRECTORY_SEPARATOR]);
+        $scoredReview = $this->get('SemanticApp')->handle($request->request->get('review'));
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse($scoredReview->toString());
+        }
+        return $this->render('RatingBundle:Rating:review.html.twig', ['review' => $scoredReview->toArray()]);
     }
 }

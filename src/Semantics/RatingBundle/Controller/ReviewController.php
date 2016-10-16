@@ -3,7 +3,7 @@
 namespace Semantics\RatingBundle\Controller;
 
 use Semantics\RatingBundle\Entity\Review;
-use Semantics\RatingBundle\Interfaces\IEntity;
+use Semantics\RatingBundle\Interfaces\SemanticEntityHolder;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,7 +21,7 @@ class ReviewController extends Controller
                         ->getRepository('RatingBundle:Review')
                         ->findAll());
         /** @var Review $r */
-        $r2 = array_map(function (IEntity $entity) {
+        $r2 = array_map(function (SemanticEntityHolder $entity) {
             return $entity->toArray();
         }, $r);
 
@@ -38,7 +38,7 @@ class ReviewController extends Controller
                 ->getRepository('RatingBundle:Review')
                 ->findBy([], ['id' => $request->query->get('sord')], $request->query->get('rows'), ($request->query->get('page') - 1) * $request->query->get('rows'));
         /** @var Review $r */
-        $r2 = array_map(function (IEntity $entity) {
+        $r2 = array_map(function (SemanticEntityHolder $entity) {
             return $entity->toArray();
         }, $r);
 

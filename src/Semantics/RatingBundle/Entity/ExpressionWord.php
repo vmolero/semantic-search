@@ -2,16 +2,16 @@
 
 namespace Semantics\RatingBundle\Entity;
 
+use AppBundle\Entity\ReviewWord;
 use Doctrine\ORM\Mapping as ORM;
-use Semantics\RatingBundle\Repository\ExpressionWordRepository;
 
 /**
  * ReviewWord
  *
  * @ORM\Table(name="ss_expression_word")
- * @ORM\Entity(repositoryClass="ExpressionWordRepository")
+ * @ORM\Entity(repositoryClass="Semantics\RatingBundle\Repository\ExpressionWordRepository")
  */
-class ExpressionWord extends Entity
+class ExpressionWord extends SemanticEntity
 {
     /**
      * @var int
@@ -25,16 +25,31 @@ class ExpressionWord extends Entity
      * @var int
      *
      * @ORM\Column(name="word_id", type="integer")
-     * @ORM\ManyToOne(targetEntity="Semantics\RatingBundle\Entity\Expression", inversedBy="ss_expression", cascade={"all"})
      */
     private $wordId;
     /**
      * @var int
      *
+     * @ORM\ManyToOne(targetEntity="Word")
+     * @ORM\JoinColumn(name="word_id", referencedColumnName="id")
+     */
+    private $word;
+    /**
+     * @var int
+     *
      * @ORM\Column(name="expression_id", type="integer")
-     * @ORM\ManyToOne(targetEntity="Semantics\RatingBundle\Entity\Word", inversedBy="ss_word", cascade={"all"})
      */
     private $expressionId;
+    /**
+     * @var int
+     * @ORM\ManyToOne(targetEntity="Word")
+     * @ORM\JoinColumn(name="expression_id", referencedColumnName="id")
+     */
+    private $expression;
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $feedback;
 
     /**
      * Get id
@@ -44,6 +59,33 @@ class ExpressionWord extends Entity
     public function getId()
     {
         return $this->id;
+    }
+    public function getFeedback()
+    {
+        return $this->feedback;
+    }
+    public function setFeedback($feedback)
+    {
+        $this->feedback = $feedback;
+        return $this;
+    }
+    public function getWord()
+    {
+        return $this->word;
+    }
+    public function getExpression()
+    {
+        return $this->expression;
+    }
+    public function setWord($word)
+    {
+        $this->word = $word;
+        return $this;
+    }
+    public function setExpression($expression)
+    {
+        $this->expression = $expression;
+        return $this;
     }
     /**
      * Set wordId

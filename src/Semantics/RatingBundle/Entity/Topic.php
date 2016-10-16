@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Table(name="ss_topic")
  */
-final class Topic extends Entity
+final class Topic extends SemanticEntity
 {
     /**
      * @ORM\Id

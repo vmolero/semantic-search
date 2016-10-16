@@ -1,6 +1,27 @@
+test:
+    path:   /test
+    defaults: { _controller: RatingBundle:Rating:test }
 rating_homepage:
     path:     /rating
     defaults: { _controller: RatingBundle:Rating:index }
+rating_do:
+    path:     /rating/do
+    defaults: { _controller: RatingBundle:Rating:do }
+rating_int_1:
+    path:     /int/rating/expressions
+    defaults: { _controller: RatingBundle:Rating:rateexpr }
+rating_int_2:
+    path:     /int/parse/expression/words
+    defaults: { _controller: RatingBundle:Rating:lexiexpr }
+rating_int_3:
+    path:     /int/parse/topic/words
+    defaults: { _controller: RatingBundle:Rating:lexitopic }
+rating_int_4:
+    path:     /int/parse/words
+    defaults: { _controller: RatingBundle:Rating:lexiword }
+rating_int_5:
+    path:     /int/rating/words
+    defaults: { _controller: RatingBundle:Rating:rateword }
 review_index:
     path:     /review
     defaults: { _controller: RatingBundle:Review:index }

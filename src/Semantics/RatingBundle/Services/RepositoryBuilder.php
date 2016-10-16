@@ -2,14 +2,14 @@
 
 namespace Semantics\RatingBundle\Services;
 
-use Semantics\RatingBundle\Interfaces\IEntity;
+use Semantics\RatingBundle\Interfaces\SemanticEntityHolder;
 
 /**
  * Description of RepositoryBuilderService
  *
  * @author Víctor Molero
  */
-final class RepositoryBuilderService
+final class RepositoryBuilder
 {
     /**
      *
@@ -29,7 +29,9 @@ final class RepositoryBuilderService
     {
         if ($this->entity instanceof IEntity) {
             foreach ($setters as $name => $value) {
-                $this->entity->{'set' . ucfirst($name)}($value);
+                if (method_exists($this->entity, 'set' . ucfirst($name))) {
+                    $this->entity->{'set' . ucfirst($name)}($value);
+                }
             }
         }
         return $this;

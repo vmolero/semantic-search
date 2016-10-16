@@ -10,10 +10,10 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @author Víctor Molero
  *
- * @ORM\Entity
- * @ORM\Table(name="ss_review")
+ * @ORM\Entity(repositoryClass="Semantics\RatingBundle\Repository\ReviewRepository")
+ * @ORM\Table(name="ss_review",indexes={@ORM\Index(name="hash_idx", columns={"hash"})})
  */
-final class Review extends Entity
+final class Review extends SemanticEntity
 {
     /**
      * @ORM\Id
@@ -21,6 +21,10 @@ final class Review extends Entity
      * @ORM\Column(type="integer")
      */
     private $id;
+    /**
+     * @ORM\Column(type="string", nullable=true, unique=true)
+     */
+    private $hash;
     /**
      * @ORM\Column(type="string")
      */
@@ -34,27 +38,43 @@ final class Review extends Entity
      */
     private $feedback;
     /**
-     * @ORM\Column(type="integer", name="positiveCount")
+     * @ORM\Column(type="integer", name="positiveCount", options={"default" : 0})
      */
-    private $positiveCount;
+    private $positiveCount = 0;
     /**
-     * @ORM\Column(type="integer", name="negativeCount")
+     * @ORM\Column(type="integer", name="negativeCount", options={"default" : 0})
      */
-    private $negativeCount;
-
+    private $negativeCount = 0;
     /**
-     * @var ArrayCollection
-     *
-     * @ORM\OneToMany(targetEntity="Word", mappedBy="ss_review")
+     * @ORM\OneToMany(targetEntity="Expression", mappedBy="review", cascade={"persist"}, orphanRemoval=true)
+     */
+    private $lines;
 
-      private $words; */
     public function __construct()
     {
-        // $this->words = new ArrayCollection();
+        $this->lines = new ArrayCollection();
+    }
+    public function getLines()
+    {
+        return $this->lines;
+    }
+    public function setLines($lines)
+    {
+        $this->lines = $lines;
+        return $this;
     }
     public function getId()
     {
         return $this->id;
+    }
+    public function getHash()
+    {
+        return $this->hash;
+    }
+    public function setHash($hash)
+    {
+        $this->hash = $hash;
+        return $this;
     }
     public function getReview()
     {

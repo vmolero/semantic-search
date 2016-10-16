@@ -2,18 +2,20 @@
 
 namespace Semantics\RatingBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-
-// use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * Description of Word
  *
  * @author Víctor Molero
- * @ORM\Entity
- * @ORM\Table(name="ss_expression")
+ * @ORM\Entity(repositoryClass="Semantics\RatingBundle\Repository\ExpressionRepository")
+ * @ORM\Table(name="ss_expression",
+ *            indexes={@ORM\Index(name="hash_idx2", columns={"hash", "review_id"})},
+ *            uniqueConstraints={@ORM\UniqueConstraint(name="unique_hash_review_1", columns={"hash", "review_id"})}
+ *           )
  */
-final class Expression extends Entity
+class Expression extends SemanticEntity
 {
     /**
      * @var integer
@@ -22,7 +24,17 @@ final class Expression extends Entity
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    protected $id;
+    /**
+     * @ORM\Column(type="string")
+     */
+    private $hash;
+    /**
+     * @var integer
+     *
+     * @ORM\Column(type="integer", name="review_id")
+     */
+    private $reviewId;
     /**
      * @var string
      *
@@ -32,11 +44,18 @@ final class Expression extends Entity
     /**
      * @var integer
      *
-     * @ORM\Column(type="integer")
-     * @ORM\ManyToOne(targetEntity="Semantics\RatingBundle\Entity\Review")
-     * @ORM\JoinColumn(name="review_id", referencedColumnName="id")
+     * @ORM\Column(type="integer", nullable=true)
      */
-    private $reviewId;
+    private $expressionId;
+    /**
+     * @ORM\OneToMany(targetEntity="Expression", mappedBy="sentence", cascade={"persist"}, orphanRemoval=true)
+     */
+    private $fragments;
+    /**
+     * @ORM\ManyToOne(targetEntity="Expression", inversedBy="fragments")
+     * @ORM\JoinColumn(name="expression_id", referencedColumnName="id")
+     */
+    private $sentence;
     /**
      * @ORM\Column(type="decimal", precision=5, scale=2, nullable=false, options={"default" : 0})
      */
@@ -46,21 +65,63 @@ final class Expression extends Entity
      */
     private $feedback;
     /**
-     * @ORM\Column(type="integer", name="positiveCount")
+     * @ORM\ManyToOne(targetEntity="Review", inversedBy="lines")
+     * @ORM\JoinColumn(name="review_id", referencedColumnName="id")
      */
-    private $positiveCount;
-    /**
-     * @ORM\Column(type="integer", name="negativeCount")
-     */
-    private $negativeCount;
+    private $review;
 
     public function __construct()
     {
-        // $this->reviews = new ArrayCollection();
+        $this->fragments = new ArrayCollection();
+    }
+    public function getFragments()
+    {
+        return $this->fragments;
+    }
+    public function setFragments($fragments)
+    {
+        $this->fragments = $fragments;
+        return $this;
+    }
+    public function getSentence()
+    {
+        return $this->sentence;
+    }
+    public function setSentence($sentence)
+    {
+        $this->sentence = $sentence;
+        return $this;
+    }
+    public function getReview()
+    {
+        return $this->review;
+    }
+    public function setReview($review)
+    {
+        $this->review = $review;
+        return $this;
     }
     public function getId()
     {
         return $this->id;
+    }
+    public function getHash()
+    {
+        return $this->hash;
+    }
+    public function setHash($hash)
+    {
+        $this->hash = $hash;
+        return $this;
+    }
+    public function getExpressionId()
+    {
+        return $this->expressionId;
+    }
+    public function setExpressionId($expressionId)
+    {
+        $this->expressionId = $expressionId;
+        return $this;
     }
     public function getExpression()
     {
@@ -77,14 +138,6 @@ final class Expression extends Entity
     public function getFeedback()
     {
         return $this->feedback;
-    }
-    public function getPositiveCount()
-    {
-        return $this->positiveCount;
-    }
-    public function getNegativeCount()
-    {
-        return $this->negativeCount;
     }
     public function setId($id)
     {
@@ -109,16 +162,6 @@ final class Expression extends Entity
     public function setFeedback($feedback)
     {
         $this->feedback = $feedback;
-        return $this;
-    }
-    public function setPositiveCount($positiveCount)
-    {
-        $this->positiveCount = $positiveCount;
-        return $this;
-    }
-    public function setNegativeCount($negativeCount)
-    {
-        $this->negativeCount = $negativeCount;
         return $this;
     }
 }

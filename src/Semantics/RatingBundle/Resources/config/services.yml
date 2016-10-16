@@ -1,13 +1,21 @@
 services:
     CurlService:
         class: anlutro\cURL\cURL
-    StemmerService:
-        class: Semantics\RatingBundle\Services\PorterStemmerService
-    MorphAdornerService:
-        class: Semantics\RatingBundle\Services\MorphAdornerService
-        arguments: ["@CurlService", "@logger"]
-    RepositoryBuilderService:
-        class: Semantics\RatingBundle\Services\RepositoryBuilderService
+    PorterStemmer:
+        class: Semantics\RatingBundle\Services\PorterStemmer
+    MorphAdorner:
+        class: Semantics\RatingBundle\Services\MorphAdorner
+        arguments: ["@doctrine", "@CurlService", "@PorterStemmer", "@logger"]
+    RepositoryBuilder:
+        class: Semantics\RatingBundle\Services\RepositoryBuilder
+    DoctrinePersister:
+        class: Semantics\RatingBundle\Services\DoctrinePersister
+        arguments: ["@Doctrine, "@MorphAdorner", "@RepositoryBuilder", "@logger"]
+    ReviewAnalyzer:
+        class: Semantics\RatingBundle\Services\ReviewAnalyzer
+    SemanticApp:
+        class: Semantics\RatingBundle\Domain\SemanticApp
+        arguments: ["@DoctrinePersister, "@ReviewAnalyzer"]
     app.datagrid.builder.topic_management:
         class: Semantics\RatingBundle\Services\Datagrid\TopicManagementBuilder
         arguments: ["@thrace_data_grid.factory.datagrid", "@translator", "@router", "@doctrine.orm.entity_manager"]

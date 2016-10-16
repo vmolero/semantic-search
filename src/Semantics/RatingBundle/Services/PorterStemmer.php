@@ -17,7 +17,7 @@ namespace Semantics\RatingBundle\Services;
  * PHP5 Implementation of the Porter Stemmer algorithm. Certain elements
  * were borrowed from the (broken) implementation by Jon Abernathy.
  */
-final class PorterStemmerService
+final class PorterStemmer
 {
     /**
      * Regex for matching a consonant
@@ -50,8 +50,8 @@ final class PorterStemmerService
         }
 
         // Check cache
-        if ($cache AND ! empty($this->$cache[$word])) {
-            return $this->$cache[$word];
+        if ($cache AND ! empty($this->cache[$word])) {
+            return $this->cache[$word];
         }
 
         /**
@@ -68,7 +68,7 @@ final class PorterStemmerService
 
         // Store in cache
         if ($cache) {
-            $this->$cache[$word] = $stem;
+            $this->cache[$word] = $stem;
         }
 
         return $stem;
@@ -89,7 +89,7 @@ final class PorterStemmerService
 
         // Part b
         if (substr($word, -2, 1) != 'e' OR ! $this->replace($word, 'eed', 'ee', 0)) { // First rule
-            $v = $this->$regex_vowel;
+            $v = $this->regex_vowel;
 
             // ing and ed
             if (preg_match("#$v+#", substr($word, 0, -3)) && $this->replace($word, 'ing', '')
@@ -122,7 +122,7 @@ final class PorterStemmerService
      */
     private function step1c($word)
     {
-        $v = $this->$regex_vowel;
+        $v = $this->regex_vowel;
 
         if (substr($word, -1) == 'y' && preg_match("#$v+#", substr($word, 0, -1))) {
             $this->replace($word, 'y', 'i');
@@ -362,8 +362,8 @@ final class PorterStemmerService
      */
     private function m($str)
     {
-        $c = $this->$regex_consonant;
-        $v = $this->$regex_vowel;
+        $c = $this->regex_consonant;
+        $v = $this->regex_vowel;
 
         $str = preg_replace("#^$c+#", '', $str);
         $str = preg_replace("#$v+$#", '', $str);
@@ -381,7 +381,7 @@ final class PorterStemmerService
      */
     private function doubleConsonant($str)
     {
-        $c = $this->$regex_consonant;
+        $c = $this->regex_consonant;
 
         return preg_match("#$c{2}$#", $str, $matches) AND $matches[0]{0} == $matches[0]{1};
     }
@@ -393,8 +393,8 @@ final class PorterStemmerService
      */
     private function cvc($str)
     {
-        $c = $this->$regex_consonant;
-        $v = $this->$regex_vowel;
+        $c = $this->regex_consonant;
+        $v = $this->regex_vowel;
 
         return preg_match("#($c$v$c)$#", $str, $matches)
                 AND strlen($matches[1]) == 3

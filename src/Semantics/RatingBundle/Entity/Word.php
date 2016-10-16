@@ -4,16 +4,14 @@ namespace Semantics\RatingBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-// use Doctrine\Common\Collections\ArrayCollection;
-
 /**
  * Description of Word
  *
  * @author Víctor Molero
- * @ORM\Entity
- * @ORM\Table(name="ss_word")
+ * @ORM\Entity(repositoryClass="Semantics\RatingBundle\Repository\WordRepository")
+ * @ORM\Table(name="ss_word", indexes={@ORM\Index(name="word_idx", columns={"word"})})
  */
-final class Word extends Entity
+final class Word extends SemanticEntity
 {
     /**
      * @var integer
@@ -32,15 +30,49 @@ final class Word extends Entity
     /**
      * @var integer
      *
-     * @ORM\Column(type="integer")
-     * @ORM\ManyToOne(targetEntity="Semantics\RatingBundle\Entity\Corpus")
-     * @ORM\JoinColumn(name="corpus_id", referencedColumnName="id")
+     * @ORM\Column(name="corpus_id", type="integer", nullable=true)
      */
     private $corpusId;
+    /**
+     * @ORM\ManyToOne(targetEntity="Corpus")
+     * @ORM\JoinColumn(name="corpus_id", referencedColumnName="id")
+     */
+    private $corpus;
+    /**
+     * @ORM\Column(type="decimal", precision=5, scale=2, nullable=true, options={"default" : 0})
+     */
+    private $score;
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $feedback;
 
-    public function __construct()
+    public function getCorpus()
     {
-
+        return $this->corpus;
+    }
+    public function setCorpus($corpus)
+    {
+        $this->corpus = $corpus;
+        return $this;
+    }
+    public function getScore()
+    {
+        return $this->score;
+    }
+    public function getFeedback()
+    {
+        return $this->feedback;
+    }
+    public function setScore($score)
+    {
+        $this->score = $score;
+        return $this;
+    }
+    public function setFeedback($feedback)
+    {
+        $this->feedback = $feedback;
+        return $this;
     }
     public function getId()
     {
@@ -52,7 +84,7 @@ final class Word extends Entity
     }
     public function getCorpusId()
     {
-        return $this->corpusId;
+        return $this->corpusId ?: $this->corpus->getId();
     }
     public function setId($id)
     {
@@ -68,5 +100,9 @@ final class Word extends Entity
     {
         $this->corpusId = $corpusId;
         return $this;
+    }
+    public function getClass()
+    {
+        return $this->corpus->getClass();
     }
 }

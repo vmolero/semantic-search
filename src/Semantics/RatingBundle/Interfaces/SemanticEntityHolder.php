@@ -12,9 +12,8 @@ namespace Semantics\RatingBundle\Interfaces;
  *
  * @author Víctor Molero
  */
-interface IEntity
+interface SemanticEntityHolder
 {
-    public function getId();
-    public function setId($id);
+    public function copy();
     public function toArray();
 }
