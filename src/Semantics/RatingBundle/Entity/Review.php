@@ -4,6 +4,7 @@ namespace Semantics\RatingBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Semantics\RatingBundle\Interfaces\SemanticEntityHolder;
 
 /**
  * Description of Review
@@ -40,11 +41,11 @@ final class Review extends SemanticEntity
     /**
      * @ORM\Column(type="integer", name="positiveCount", options={"default" : 0})
      */
-    private $positiveCount = 0;
+    private $positiveCount          = 0;
     /**
      * @ORM\Column(type="integer", name="negativeCount", options={"default" : 0})
      */
-    private $negativeCount = 0;
+    private $negativeCount          = 0;
     /**
      * @ORM\OneToMany(targetEntity="Expression", mappedBy="review", cascade={"persist"}, orphanRemoval=true)
      */
@@ -53,6 +54,7 @@ final class Review extends SemanticEntity
      * @var ArrayCollection
      */
     private $topics;
+    protected $methodRenderPatterns = ['/(?!^getTopics$)^get[a-zA-Z]+$/'];
 
     public function __construct()
     {
@@ -104,11 +106,15 @@ final class Review extends SemanticEntity
     }
     public function getPositiveCount()
     {
-        return $this->positiveCount;
+        return array_sum(array_map(function (SemanticEntityHolder $line) {
+                    return $line->getFeedback() == 1 ? 1 : 0;
+                }, $this->getLines()));
     }
     public function getNegativeCount()
     {
-        return $this->negativeCount;
+        return array_sum(array_map(function (SemanticEntityHolder $line) {
+                    return $line->getFeedback() == -1 ? 1 : 0;
+                }, $this->getLines()));
     }
     public function setPositiveCount($positiveCount)
     {

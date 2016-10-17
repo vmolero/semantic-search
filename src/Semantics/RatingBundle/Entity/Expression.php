@@ -44,7 +44,7 @@ class Expression extends SemanticEntity
     /**
      * @var integer
      *
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="expression_id", type="integer", nullable=true)
      */
     private $expressionId;
     /**
@@ -69,11 +69,25 @@ class Expression extends SemanticEntity
      * @ORM\JoinColumn(name="review_id", referencedColumnName="id")
      */
     private $review;
+    /**
+     * @ORM\OneToMany(targetEntity="ExpressionWord", mappedBy="expression", cascade={"persist"}, orphanRemoval=true)
+     */
+    private $wordsInExpression;
     protected $methodRenderPatterns = ['/(?!(^getReview$|^getSentence$))^get[a-zA-Z]+$/'];
 
     public function __construct()
     {
-        $this->fragments = new ArrayCollection();
+        $this->fragments         = new ArrayCollection();
+        $this->wordsInExpression = new ArrayCollection();
+    }
+    public function getWordsInExpression()
+    {
+        return $this->wordsInExpression;
+    }
+    public function setWordsInExpression($wordsInExpression)
+    {
+        $this->wordsInExpression = $wordsInExpression;
+        return $this;
     }
     public function getFragments()
     {

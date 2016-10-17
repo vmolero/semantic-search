@@ -28,9 +28,7 @@ class ExpressionWord extends SemanticEntity
      */
     private $wordId;
     /**
-     * @var int
-     *
-     * @ORM\ManyToOne(targetEntity="Word")
+     * @ORM\ManyToOne(targetEntity="Word", inversedBy="expressionsContaingWord")
      * @ORM\JoinColumn(name="word_id", referencedColumnName="id")
      */
     private $word;
@@ -41,33 +39,32 @@ class ExpressionWord extends SemanticEntity
      */
     private $expressionId;
     /**
-     * @var int
-     * @ORM\ManyToOne(targetEntity="Word")
+     * @ORM\ManyToOne(targetEntity="Expression", inversedBy="wordsInExpression")
      * @ORM\JoinColumn(name="expression_id", referencedColumnName="id")
      */
     private $expression;
     /**
      * @ORM\Column(type="integer")
      */
-    private $feedback;
+    private $position;
 
     /**
      * Get id
      *
      * @return integer
      */
+    public function getPosition()
+    {
+        return $this->position;
+    }
+    public function setPosition($position)
+    {
+        $this->position = $position;
+        return $this;
+    }
     public function getId()
     {
         return $this->id;
-    }
-    public function getFeedback()
-    {
-        return $this->feedback;
-    }
-    public function setFeedback($feedback)
-    {
-        $this->feedback = $feedback;
-        return $this;
     }
     public function getWord()
     {
@@ -120,5 +117,13 @@ class ExpressionWord extends SemanticEntity
     public function setId($id)
     {
         $this->id = $id;
+    }
+    public function getClass()
+    {
+        $this->word->getClass();
+    }
+    public function getWordInExpression()
+    {
+        $this->word->getWord();
     }
 }

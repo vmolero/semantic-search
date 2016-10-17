@@ -4,6 +4,7 @@ namespace Semantics\RatingBundle\Services;
 
 use Semantics\RatingBundle\Entity\Corpus;
 use Semantics\RatingBundle\Entity\Expression;
+use Semantics\RatingBundle\Entity\ExpressionWord;
 use Semantics\RatingBundle\Entity\Word;
 use Semantics\RatingBundle\Interfaces\SemanticEntityHolder;
 use Semantics\RatingBundle\Interfaces\StrategyDigestor;
@@ -26,7 +27,10 @@ final class ReviewAnalyzer implements StrategyDigestor
      */
     private $morph;
 
-    const WINDOW_SIZE = 4;
+    const CLASS_DISCRIMINATOR    = ['noun', 'adjective', 'negative', 'adverb', 'verb'];
+    const PHRASE_SPLITTER_REGEXP = '/[,;:]+/';
+    const WORD_SEPARATOR         = '/[\s]+/';
+    const WINDOW_SIZE            = 4;
 
     public function __construct(MorphAdorner $morph, RepositoryBuilder $builder)
     {
@@ -43,82 +47,97 @@ final class ReviewAnalyzer implements StrategyDigestor
     }
     private function analyze(SemanticEntityHolder $review)
     {
-        print_r($review->toArray());
-        die;
-        array_walk($review->getExpressions()->getValues(), function (SemanticEntityHolder &$exprEntity) {
-            /** @var Expression $exprEntity */
-            $subordinates = preg_split('/[,;]+/', $exprEntity->getExpression());
-            $partials     = [];
+        $lines  = $review->getLines();
+        $topics = array_map(function (SemanticEntityHolder $word) {
+            return $word->getTopic();
+        }, $review->getTopics());
+        array_walk($lines, function (SemanticEntityHolder &$lineEntity) use ($topics) {
+            /* @var $exprEntity Expression  */
+            $subordinates                  = preg_split(self::PHRASE_SPLITTER_REGEXP, $lineEntity->getExpression());
+            $definitiveRelevantExpressions = [];
             foreach ($subordinates as $subExpression) {
-                $tokens      = $this->tokenizeSentence($subExpression);
-                $ngramResult = $this->ngramSentenceParser($tokens, self::WINDOW_SIZE);
-                if (count($ngramResult)) {
-                    $partials[] = $this->selectHighestWithNounAndAdjective($ngramResult);
-                }
-            }
-            var_dump($subordinates);
+                $wordsInExpression = $this->tokenizeSentence($subExpression);
 
-            if (!empty($partials)) {
-                $exprEntity->setFragments(array_map(function ($partial) {
-                            return $this->builder->create(Expression::class)->build(['word' => $partial])->getConcrete();
-                        }, $partials));
+                $relevantExpressions = $this->ngramSentenceParser($wordsInExpression, self::WINDOW_SIZE, $topics, $lineEntity->getFeedback());
+
+                $relevantAndMatchingFeedback   = $this->sameFeedbackAsLine($relevantExpressions, $lineEntity->getFeedback());
+                $definitiveRelevantExpressions += $relevantAndMatchingFeedback;
+            }
+            if (count($relevantAndMatchingFeedback)) {
+                $lineEntity->setFragments($relevantAndMatchingFeedback);
             }
         });
-
         return $review;
     }
+    /**
+     *
+     * @param string $sentence
+     * @return array
+     */
     private function tokenizeSentence($sentence)
     {
-        return array_map(function($word) {
-
-            $wordEntity   = $this->builder->create(Word::class)->build(['word' => $word])->getConcrete();
-            $corpusEntity = $this->builder->create(Corpus::class)->build($this->morph->lexiconLookup($word))->getConcrete();
-            $wordEntity->setCorpus($corpusEntity);
-            return $wordEntity;
-        }, preg_split('/[\s]+/', trim($sentence)));
-    }
-    private function selectHighestWithNounAndAdjective(array $ngramResult)
-    {
-        $maxPositive      = null;
-        $maxPositiveScore = 0;
-        $maxNegative      = null;
-        $maxNegativeScore = 0;
-        while ($current          = array_shift($ngramResult)) {
-            if ($current['feedback'] == 1 && $current['score'] > $maxPositiveScore) {
-                $maxPositiveScore = $current['score'];
-                $maxPositive      = $current;
-            }
-            if ($current['feedback'] == -1 && $current['score'] > $maxNegativeScore) {
-                $maxNegativeScore = $current['score'];
-                $maxNegative      = $current;
+        $words                 = preg_split(self::WORD_SEPARATOR, trim($sentence));
+        $expresionWordEntities = [];
+        foreach ($words as $position => $word) {
+            if (strlen(trim($word)) > 0) {
+                $expresionWordEntities[] = $this->tokenizeExpressionWord(trim($word), $position);
             }
         }
-        $final       = ($maxPositiveScore - $maxNegativeScore);
-        $finalResult = $final > 0 ? $maxPositive : ($final < 0 ? $maxNegative : []);
-        var_dump($finalResult);
+        return $expresionWordEntities;
+    }
+    private function tokenizeExpressionWord($word, $position)
+    {
+        $wordEntity     = $this->builder->create(Word::class)->build(['word' => $word])->getConcrete();
+        $corpusEntity   = $this->builder->create(Corpus::class)->build($this->morph->lexiconLookup($word))->getConcrete();
+        $wordEntity->setCorpus($corpusEntity);
+        $expressionWord = $this->builder->create(ExpressionWord::class)->build(['word' => $wordEntity, 'position' => $position])->getConcrete();
+        return $expressionWord;
+    }
+    private function sameFeedbackAsLine(array $ngramResult, $feedback)
+    {
+        return array_filter($ngramResult, function (SemanticEntityHolder $linesSegment) use ($feedback) {
+            return $linesSegment->getFeedback() == $feedback;
+        });
+    }
+    private function maxScore(array $ngramPartialResult, $feedback)
+    {
+        $max      = null;
+        $maxScore = 0;
+        while ($current  = array_shift($ngramPartialResult)) {
+            if ($current->getFeedback() == $feedback && $current->getScore() > $maxScore) {
+                $maxScore = $current->getScore();
+                $max      = $current;
+            }
+        }
+        return $max;
+    }
+    private function ngramSentenceParser(array $expressionWords, $window, $topics, $lineFeedback)
+    {
+        $break               = false;
+        $relevantExpressions = [];
+        $partialSet          = [];
+        for ($i = 0; $i < count($expressionWords) && !$break; $i++) {
+            $nGram       = array_slice($expressionWords, $i, $window);
+            $nGramString = trim(implode(' ', array_map(function (SemanticEntityHolder $exprWord) use ($topics) {
+                                return in_array($exprWord->getClass(), self::CLASS_DISCRIMINATOR) || preg_match($this->createTopicRegExpr($topics), $exprWord->getWord()) == 1 ? $exprWord->getWord() : '';
+                            }, $nGram)));
+            if (strlen($nGramString) > 0) {
+                $exp = $this->builder->create(Expression::class)->build(['expression' => $nGramString, 'hash' => md5($nGramString)] + $this->morph->sentimentAnalyzer($nGramString))->getConcrete();
+                print_r($exp);
+                if ($exp->getFeedback() == $lineFeedback) {
+                    if ($i > 0 && $i % self::WINDOW_SIZE != 0) {
+                        $partialSet[] = $exp;
+                    } else {
+                        $maxScoredPartial      = $this->maxScore($partialSet, $lineFeedback);
+                        $maxScoredPartial->setWordsInExpression($nGram);
+                        $relevantExpressions[] = $maxScoredPartial;
+                        $partialSet            = [];
+                    }
+                }
+            }
+            $break = ($i + self::WINDOW_SIZE) == count($expressionWords);
+        }
         die;
-        if (count($finalResult)) {
-            return $this->builder->create(Expression::class)->build($finalResult)->getConcrete();
-        }
-    }
-    private function ngramSentenceParser(array $tokens, $window)
-    {
-        $break     = false;
-        $resultSet = [];
-        for ($i = 0; $i < count($tokens) && !$break; $i++) {
-            $partialTokens = array_slice($tokens, $i, $window);
-            $substring     = trim(implode(' ', array_map(function (SemanticEntityHolder $word) {
-                                return $word->getWord();
-                            }, $partialTokens)));
-            $classes = array_unique(array_map(function (SemanticEntityHolder $word) {
-                        return $word->getClass();
-                    }, $partialTokens));
-            //preg_match($this->createTopicRegExpr(), $substring)
-            if ((in_array('noun', $classes) && in_array('adjective', $classes)) || in_array('adjective', $classes)) {
-                $resultSet[] = ['expression' => $substring] + $this->morph->sentimentAnalyzer($substring);
-            }
-            $break = ($i + self::WINDOW_SIZE) == count($tokens);
-        }
-        return $resultSet;
+        return $relevantExpressions;
     }
 }

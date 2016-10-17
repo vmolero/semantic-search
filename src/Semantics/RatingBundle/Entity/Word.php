@@ -2,6 +2,7 @@
 
 namespace Semantics\RatingBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -46,7 +47,17 @@ final class Word extends SemanticEntity
      * @ORM\Column(type="integer", nullable=true)
      */
     private $feedback;
+    /**
 
+     * @ORM\OneToMany(targetEntity="ExpressionWord", mappedBy="word", cascade={"persist"}, orphanRemoval=true)
+     */
+    private $expressionsContaingWord;
+    protected $methodRenderPatterns = ['/(?!^getExpressionsContaingWord$)^get[a-zA-Z]+$/'];
+
+    public function __construct()
+    {
+        $this->wordsInExpression = new ArrayCollection();
+    }
     public function getCorpus()
     {
         return $this->corpus;
@@ -54,6 +65,15 @@ final class Word extends SemanticEntity
     public function setCorpus($corpus)
     {
         $this->corpus = $corpus;
+        return $this;
+    }
+    public function getExpressionsContaingWord()
+    {
+        return $this->expressionsContaingWord;
+    }
+    public function setExpressionsContaingWord($expressionsContaingWord)
+    {
+        $this->expressionsContaingWord = $expressionsContaingWord;
         return $this;
     }
     public function getScore()
