@@ -28,6 +28,10 @@ final class Corpus extends SemanticEntity
      * @ORM\Column(type="string")
      */
     private $class;
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $stem;
 
     public function getId()
     {
@@ -41,9 +45,13 @@ final class Corpus extends SemanticEntity
     {
         return $this->class;
     }
-    public function setClass($class)
+    public function getStem()
     {
-        $this->class = $class;
+        return $this->stem;
+    }
+    public function setId($id)
+    {
+        $this->id = $id;
         return $this;
     }
     public function setLemma($lemma)
@@ -51,9 +59,14 @@ final class Corpus extends SemanticEntity
         $this->lemma = $lemma;
         return $this;
     }
-    public function setId($id)
+    public function setClass($class)
     {
-        $this->id = $id;
+        $this->class = $class;
+        return $this;
+    }
+    public function setStem($stem)
+    {
+        $this->stem = $stem;
         return $this;
     }
 }

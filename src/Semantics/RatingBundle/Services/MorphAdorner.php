@@ -98,7 +98,7 @@ final class MorphAdorner
         try {
             return $this->getCache('lemmatizer_' . md5($word));
         } catch (Exception $ignore) {
-            return $this->setCache('lemmatizer_' . md5($word), ['word' => $word] + $this->parseLemmatizer($this->connector('http://classify.at.northwestern.edu/maserver/lemmatizer', ['corpusConfig' => 'ncf', 'media' => 'xml', 'spelling' => $word, 'standardize' => true, 'wordClass' => $this->tagToClass($wordClass)])));
+            return $this->setCache('lemmatizer_' . md5($word), ['word' => $word, 'stem' => $this->stemmer->Stem($word)] + $this->parseLemmatizer($this->connector('http://classify.at.northwestern.edu/maserver/lemmatizer', ['corpusConfig' => 'ncf', 'media' => 'xml', 'spelling' => $word, 'standardize' => true, 'wordClass' => $this->tagToClass($wordClass)])));
         }
     }
     /**
@@ -148,13 +148,8 @@ final class MorphAdorner
         if (count($indexes)) {
             $values   = $this->XMLtoArray($xpath->query('//lemmata/entry/string[2]/text()'));
             $tt       = array_combine($indexes, $values);
-            $indexes2 = $this->XMLtoArray($xpath->query('//categoriesAndCounts/entry/string[1]/text()'));
-            $counts   = $this->XMLtoArray($xpath->query('//mutableInteger/text()'));
-            $tt2      = array_combine($indexes2, $counts);
-
-            asort($tt2, SORT_NUMERIC);
-            end($tt2);
-            return ['lemma' => $tt[key($tt2)], 'tag' => key($tt2), 'class' => $this->tagToClass(key($tt2))];
+            $tagIndex = $xpath->query('//largestCategory/text()')->item(0)->nodeValue;
+            return ['lemma' => $tt[$tagIndex], 'tag' => $tagIndex, 'class' => $this->tagToClass($tagIndex)];
         }
         return [];
     }
@@ -225,6 +220,8 @@ final class MorphAdorner
     private function tagToClass($tag)
     {
         switch (1) {
+            case preg_match('/^.*x$/', $tag):
+                return 'negative';
             case preg_match('/^(n|an.*|np.*|n\d+.*)$/', $tag):
                 return 'noun';
             case preg_match('/^av.*$/', $tag):
@@ -247,8 +244,6 @@ final class MorphAdorner
                 return 'interjection';
             case preg_match('/^v(a.*|m.*|v.*|b.*)$/', $tag):
                 return 'verb';
-            case preg_match('/^xx.*$/', $tag):
-                return 'negative';
             case preg_match('/^zz.*$/', $tag):
                 return 'undetermined';
             default:

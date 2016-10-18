@@ -125,4 +125,12 @@ final class Word extends SemanticEntity
     {
         return $this->corpus->getClass();
     }
+    public function getLemma()
+    {
+        return $this->corpus->getLemma();
+    }
+    public function getStem()
+    {
+        return $this->corpus->getStem();
+    }
 }

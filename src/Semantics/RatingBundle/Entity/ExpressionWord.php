@@ -93,7 +93,6 @@ class ExpressionWord extends SemanticEntity
     public function setWordId($wordId)
     {
         $this->wordId = $wordId;
-
         return $this;
     }
     /**
@@ -121,6 +120,14 @@ class ExpressionWord extends SemanticEntity
     public function getClass()
     {
         return $this->word->getClass();
+    }
+    public function getLemma()
+    {
+        return $this->word->getLemma();
+    }
+    public function getStem()
+    {
+        return $this->word->getStem();
     }
     public function getWordInExpression()
     {
