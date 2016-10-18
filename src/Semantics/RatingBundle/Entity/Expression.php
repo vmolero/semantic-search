@@ -4,6 +4,7 @@ namespace Semantics\RatingBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Semantics\RatingBundle\Interfaces\SemanticEntityHolder;
 
 /**
  * Description of Word
@@ -73,48 +74,16 @@ class Expression extends SemanticEntity
      * @ORM\OneToMany(targetEntity="ExpressionWord", mappedBy="expression", cascade={"persist"}, orphanRemoval=true)
      */
     private $wordsInExpression;
+    /**
+     *
+     * @var array
+     */
     protected $methodRenderPatterns = ['/(?!(^getReview$|^getSentence$))^get[a-zA-Z]+$/'];
 
     public function __construct()
     {
         $this->fragments         = new ArrayCollection();
         $this->wordsInExpression = new ArrayCollection();
-    }
-    public function getWordsInExpression()
-    {
-        return $this->wordsInExpression;
-    }
-    public function setWordsInExpression($wordsInExpression)
-    {
-        $this->wordsInExpression = $wordsInExpression;
-        return $this;
-    }
-    public function getFragments()
-    {
-        return $this->fragments;
-    }
-    public function setFragments($fragments)
-    {
-        $this->fragments = $fragments;
-        return $this;
-    }
-    public function getSentence()
-    {
-        return $this->sentence;
-    }
-    public function setSentence($sentence)
-    {
-        $this->sentence = $sentence;
-        return $this;
-    }
-    public function getReview()
-    {
-        return $this->review;
-    }
-    public function setReview($review)
-    {
-        $this->review = $review;
-        return $this;
     }
     public function getId()
     {
@@ -124,27 +93,25 @@ class Expression extends SemanticEntity
     {
         return $this->hash;
     }
-    public function setHash($hash)
+    public function getReviewId()
     {
-        $this->hash = $hash;
-        return $this;
-    }
-    public function getExpressionId()
-    {
-        return $this->expressionId;
-    }
-    public function setExpressionId($expressionId)
-    {
-        $this->expressionId = $expressionId;
-        return $this;
+        return $this->reviewId;
     }
     public function getExpression()
     {
         return $this->expression;
     }
-    public function getReviewId()
+    public function getExpressionId()
     {
-        return $this->reviewId;
+        return $this->expressionId;
+    }
+    public function getFragments()
+    {
+        return $this->fragments;
+    }
+    public function getSentence()
+    {
+        return $this->sentence;
     }
     public function getScore()
     {
@@ -154,9 +121,27 @@ class Expression extends SemanticEntity
     {
         return $this->feedback;
     }
+    public function getReview()
+    {
+        return $this->review;
+    }
+    public function getWordsInExpression()
+    {
+        return $this->wordsInExpression;
+    }
     public function setId($id)
     {
         $this->id = $id;
+        return $this;
+    }
+    public function setHash($hash)
+    {
+        $this->hash = $hash;
+        return $this;
+    }
+    public function setReviewId($reviewId)
+    {
+        $this->reviewId = $reviewId;
         return $this;
     }
     public function setExpression($expression)
@@ -164,9 +149,19 @@ class Expression extends SemanticEntity
         $this->expression = $expression;
         return $this;
     }
-    public function setReviewId($reviewId)
+    public function setExpressionId($expressionId)
     {
-        $this->reviewId = $reviewId;
+        $this->expressionId = $expressionId;
+        return $this;
+    }
+    public function setFragments($fragments)
+    {
+        $this->fragments = $fragments;
+        return $this;
+    }
+    public function setSentence($sentence)
+    {
+        $this->sentence = $sentence;
         return $this;
     }
     public function setScore($score)
@@ -178,5 +173,48 @@ class Expression extends SemanticEntity
     {
         $this->feedback = $feedback;
         return $this;
+    }
+    public function setReview($review)
+    {
+        $this->review = $review;
+        return $this;
+    }
+    public function setWordsInExpression($wordsInExpression)
+    {
+        $this->wordsInExpression = $wordsInExpression;
+        return $this;
+    }
+    public function getPosition()
+    {
+        $words = $this->getWordsInExpression();
+        reset($words);
+        $first = current($words);
+        return $first->getPosition();
+    }
+    public function getLength()
+    {
+        return count($this->wordsInExpression);
+    }
+    public function hasTopic(array $topics)
+    {
+        return preg_match('/(^' . implode('$|^', $topics) . '$)/', $this->getExpression()) == 1;
+    }
+    public function hasClass($class)
+    {
+        if (is_string($class)) {
+            $classes = array_map(function (SemanticEntityHolder $wExpr) {
+                return $wExpr->getClass();
+            }, $this->getWordsInExpression());
+            return in_array($class, $classes);
+        }
+        return false;
+    }
+    public function hasAllClasses(array $classes)
+    {
+        return count($classes) ? $this->hasClass(array_shift($classes)) && $this->hasAllClasses($classes) : false;
+    }
+    public function hasAnyClasses(array $classes)
+    {
+        return count($classes) ? $this->hasClass(array_shift($classes)) || $this->hasAnyClasses($classes) : false;
     }
 }

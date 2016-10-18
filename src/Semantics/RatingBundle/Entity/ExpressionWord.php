@@ -120,10 +120,10 @@ class ExpressionWord extends SemanticEntity
     }
     public function getClass()
     {
-        $this->word->getClass();
+        return $this->word->getClass();
     }
     public function getWordInExpression()
     {
-        $this->word->getWord();
+        return $this->word->getWord();
     }
 }

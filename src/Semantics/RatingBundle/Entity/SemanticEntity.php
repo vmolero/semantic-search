@@ -55,6 +55,9 @@ abstract class SemanticEntity implements SemanticEntityHolder, Clonable, Seriali
                     return $entity->toArray();
                 }, $value);
             }
+            if ($value instanceof SemanticEntityHolder) {
+                $value = $value->toArray();
+            }
             /* @var $method ReflectionMethod */
             $array[lcfirst(preg_replace('/^get/', '', $method->getName()))] = $value;
         }
