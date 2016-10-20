@@ -2,18 +2,14 @@
 
 namespace Semantics\RatingBundle\Services;
 
-use Semantics\RatingBundle\Entity\Corpus;
 use Semantics\RatingBundle\Entity\Expression;
 use Semantics\RatingBundle\Entity\Review;
-use Semantics\RatingBundle\Entity\Topic;
-use Semantics\RatingBundle\Entity\Word;
 use Semantics\RatingBundle\Interfaces\ReviewPersister;
 use Semantics\RatingBundle\Interfaces\SemanticEntityHolder;
 use Semantics\RatingBundle\Services\MorphAdornerService;
 use Semantics\RatingBundle\Services\RepositoryBuilderService;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Bridge\Monolog\Logger;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Description of DoctrinePersister
@@ -26,22 +22,22 @@ final class DoctrinePersister implements ReviewPersister
      *
      * @var RegistryInterface
      */
-    protected $doctrine;
+    private $doctrine;
     /**
      *
      * @var MorphAdorner
      */
-    protected $morph;
+    private $morph;
     /**
      *
      * @var RepositoryBuilder
      */
-    protected $builder;
+    private $builder;
     /**
      *
      * @var ReviewEntity
      */
-    protected $review;
+    private $review;
 
     /**
      *
@@ -73,7 +69,7 @@ final class DoctrinePersister implements ReviewPersister
         if (is_string($review)) {
             $entity = $this->initReview($review)->getEntity();
         }
-        return $this->saveEntity($review);
+        return $this->saveEntity($entity);
     }
     public function getReview()
     {
@@ -112,69 +108,24 @@ final class DoctrinePersister implements ReviewPersister
                             'hash' => md5($expression),
                             'expression' => $expression] + $entityScore)->getConcrete();
     }
-    protected function split($text)
+    /**
+     *
+     * @param string $text
+     * @return string
+     */
+    private function split($text)
     {
         return array_filter(explode('.', $text), function ($line) {
             return strlen(trim($line)) > 0 && preg_match('/[a-zA-Z]/', trim($line));
         });
     }
-    protected function cleanup($text)
+    /**
+     *
+     * @param string $text
+     * @return string
+     */
+    private function cleanup($text)
     {
         return trim(preg_replace('/[^a-zA-Z,;\s\']+/', ' ', $text));
-    }
-    public function lexiexprAction()
-    {
-        $r = ($this->getDoctrine()
-                        ->getRepository('RatingBundle:Expression')
-                        ->findAll());
-
-        $r2 = array_map(function (Expression $exp) {
-            $this->saveWords(array_filter(explode(' ', trim($exp->getExpression()))));
-            return $exp->toArray();
-        }, $r);
-
-        return $this->render('RatingBundle:Rating:index.html.twig', ['list' => $r2]);
-    }
-    public function lexitopicAction()
-    {
-        $this->saveWords(array_map(function (Topic $exp) {
-                    return $exp->getTopic();
-                }, $this->getDoctrine()
-                                ->getRepository('RatingBundle:Topic')
-                                ->findAll()));
-
-        return new Response('OK!');
-    }
-    public function lexiwordAction()
-    {
-        $this->saveWords(array_map(function (Word $exp) {
-                    return $exp->getWord();
-                }, $this->getDoctrine()
-                                ->getRepository('RatingBundle:Word')
-                                ->findBy(['corpusId' => null])));
-
-        return new Response('OK!');
-    }
-    private function saveWords(array $words)
-    {
-        $orm     = $this->getDoctrine();
-        $morph   = $this->get('MorphAdornerService');
-        $builder = $this->get('RepositoryBuilderService');
-        foreach ($words as $word) {
-            $wordEntity = $orm->getRepository('RatingBundle:Word')
-                    ->save($orm, $builder->create(Word::class)
-                    ->build(['word' => $word])
-                    ->getConcrete()
-            );
-            if (null === $wordEntity->getCorpusId()) {
-                $corpusEntity = $builder->create(Corpus::class)
-                        ->build($morph->lexiconLookup($word))
-                        ->getConcrete();
-                $corpusId     = $orm->getRepository('RatingBundle:Corpus')
-                                ->save($orm, $corpusEntity)->getId();
-                $wordEntity->setCorpusId($corpusId);
-            }
-        }
-        return true;
     }
 }
