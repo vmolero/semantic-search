@@ -187,9 +187,11 @@ class Expression extends SemanticEntity
     public function getPosition()
     {
         $words = $this->getWordsInExpression();
-        reset($words);
-        $first = current($words);
-        return $first->getPosition();
+        if (is_array($words)) {
+            reset($words);
+            $first = current($words);
+            return $first->getPosition();
+        }
     }
     public function getLength()
     {

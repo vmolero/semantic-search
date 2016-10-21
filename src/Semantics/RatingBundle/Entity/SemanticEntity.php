@@ -25,7 +25,7 @@ abstract class SemanticEntity implements SemanticEntityHolder, Clonable, Seriali
 {
     protected $methodRenderPatterns = ['/^get[a-zA-Z]+$/'];
 
-    abstract public function getId();
+    //abstract public function setInput($input);
     public function copy(Clonable $copyFrom)
     {
         if (get_class($this) == get_class($copyFrom)) {
@@ -50,10 +50,10 @@ abstract class SemanticEntity implements SemanticEntityHolder, Clonable, Seriali
             if ($value instanceof Collection) {
                 $value = $value->getValues();
             }
-            if (is_array($value)) {
+            if (is_array($value) && count($value)) {
                 $value = array_map(function (Serializable $entity) {
                     return $entity->toArray();
-                }, $value);
+                }, array_filter($value));
             }
             if ($value instanceof SemanticEntityHolder) {
                 $value = $value->toArray();

@@ -110,11 +110,11 @@ final class MorphAdorner
     private function getCache($key)
     {
         try {
-            $this->logger->debug("Cache get($key): " . json_encode(self::$cache[$key]));
+            $this->logger->debug("Cache get($key): ");
             return self::$cache[$key];
         } catch (Exception $ignore) {
             $cached = $this->doctrine->getRepository('RatingBundle:Cache')->findOneBy(['key' => $key]);
-            if ($cached instanceof SemanticEntityHolder) {
+            if ($cached instanceof Cache) {
                 return json_decode($cached->getValue(), true);
             }
             throw new Exception("Key not found");
