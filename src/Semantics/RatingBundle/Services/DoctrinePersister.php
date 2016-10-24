@@ -2,8 +2,13 @@
 
 namespace Semantics\RatingBundle\Services;
 
+use Doctrine\Common\Util\Debug;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Semantics\RatingBundle\Entity\Corpus;
 use Semantics\RatingBundle\Entity\Expression;
+use Semantics\RatingBundle\Entity\ExpressionWord;
 use Semantics\RatingBundle\Entity\Review;
+use Semantics\RatingBundle\Entity\Word;
 use Semantics\RatingBundle\Interfaces\ReviewPersister;
 use Semantics\RatingBundle\Interfaces\SemanticEntityHolder;
 use Semantics\RatingBundle\Services\MorphAdornerService;
@@ -39,6 +44,10 @@ final class DoctrinePersister implements ReviewPersister
      */
     private $review;
 
+    const PHRASE_SPLITTER_REGEXP = '/[,;:]+/';
+    const WORD_SEPARATOR_REGEXP  = '/[\s]+/';
+    const CLEANUP_REGEXP         = '/[^a-zA-Z,;\s\']+/';
+
     /**
      *
      * @param RegistryInterface $orm
@@ -57,7 +66,16 @@ final class DoctrinePersister implements ReviewPersister
         $score        = $this->morph->sentimentAnalyzer($review);
         $this->review = $this->builder->create(Review::class)->build(['review' => $review, 'hash' => md5($review)] + $score)->getConcrete();
         $this->review->setLines(array_map(function($line) {
-                    $lineEntity = $this->parseExpression($this->cleanup($line), $this->review);
+                    $lineEntity   = $this->parseExpression($this->cleanup($line), $this->review);
+                    $subordinates = preg_split(self::PHRASE_SPLITTER_REGEXP, $lineEntity->getExpression());
+                    $fragments    = [];
+                    foreach ($subordinates as $subline) {
+                        $fragment = $this->parseExpression($subline, $this->review, $lineEntity);
+
+                        $fragment->setWordsInExpression($this->parseExpressionWord($subline, $lineEntity));
+                        $fragments[] = $fragment;
+                    }
+                    $lineEntity->setFragments($fragments);
                     return $lineEntity;
                 }, $this->split($this->review->getReview())));
         $this->review->setTopics($this->doctrine->getRepository('RatingBundle:Topic')->findAll());
@@ -82,14 +100,22 @@ final class DoctrinePersister implements ReviewPersister
      */
     private function saveEntity(SemanticEntityHolder $review)
     {
-        $myReviewEntity = $this->doctrine->getRepository('RatingBundle:Review')->findOneBy(['hash' => $review->getHash()]);
-        if (!$myReviewEntity instanceof SemanticEntityHolder) {
-            $this->doctrine->getManager()->persist($review);
-        } else {
-            $myReviewEntity->copy($review);
+        try {
+            $myReviewEntity = $this->doctrine->getRepository('RatingBundle:Review')->findOneBy(['hash' => $review->getHash()]);
+            if (!$myReviewEntity instanceof SemanticEntityHolder) {
+                $this->doctrine->getManager()->persist($review);
+                $this->doctrine->getManager()->flush();
+                return $this;
+            } else {
+                $myReviewEntity = $review;
+                $this->doctrine->getManager()->flush();
+                return $this;
+            }
+        } catch (UniqueConstraintViolationException $exc) {
+            var_dump($exc->getMessage());
+            die;
+            return $this;
         }
-        $this->doctrine->getManager()->flush();
-        return $this;
     }
     /**
      *
@@ -101,12 +127,17 @@ final class DoctrinePersister implements ReviewPersister
      */
     private function parseExpression($expression, SemanticEntityHolder $reviewEntity, SemanticEntityHolder $lineEntity = null, array $score = [])
     {
-        $entityScore = empty($score) ? $this->morph->sentimentAnalyzer($expression) : $score;
-        return $this->builder->create(Expression::class)
-                        ->build(['review' => $reviewEntity,
-                            'sentence' => $lineEntity,
-                            'hash' => md5($expression),
-                            'expression' => $expression] + $entityScore)->getConcrete();
+        $expressionEntity = $this->doctrine->getRepository('RatingBundle:Expression')->findOneBy(['hash' => md5($expression)]);
+        if (!$expressionEntity instanceof Expression) {
+            $entityScore      = empty($score) ? $this->morph->sentimentAnalyzer($expression) : $score;
+            $expressionEntity = $this->builder->create(Expression::class)
+                            ->build(['review' => $reviewEntity,
+                                'sentence' => $lineEntity,
+                                'hash' => md5($expression),
+                                'expression' => $expression] + $entityScore)->getConcrete();
+            return $expressionEntity;
+        }
+        return $expressionEntity;
     }
     /**
      *
@@ -126,6 +157,44 @@ final class DoctrinePersister implements ReviewPersister
      */
     private function cleanup($text)
     {
-        return trim(preg_replace('/[^a-zA-Z,;\s\']+/', ' ', $text));
+        return trim(preg_replace(self::CLEANUP_REGEXP, ' ', $text));
+    }
+    private function parseExpressionWord($cadena, $expression)
+    {
+        $words = preg_split(self::WORD_SEPARATOR_REGEXP, trim($cadena));
+        $i     = 0;
+        return array_map(function ($word) use (&$i, $expression) {
+            return $this->initExpressionWord($this->initWord($word), $i++, $expression);
+        }, $words);
+    }
+    private function initExpressionWord($wordEntity, $position, $exprEntity = null)
+    {
+        $expressionWord = $this->builder->create(ExpressionWord::class)->build(['word' => $wordEntity, 'position' => $position, 'expression' => $exprEntity])->getConcrete();
+
+        return $expressionWord;
+    }
+    public function initWord($word)
+    {
+        $debug = false;
+        if ($word == 'bad') {
+            $debug = true;
+        }
+        $wordEntity = $this->doctrine->getRepository('RatingBundle:Word')->findOneBy(['word' => $word]);
+        if ($debug) {
+            //print_r($wordEntity->toArray());
+            //die;
+        }
+        if (!$wordEntity instanceof Word) {
+            $wordEntity = $this->builder->create(Word::class)->build(['word' => $word])->getConcrete();
+        }
+        if (!$wordEntity->getCorpus()) {
+            $lexicon      = $this->morph->lexiconLookup($word);
+            $corpusEntity = $this->doctrine->getRepository('RatingBundle:Corpus')->findOneBy(['lemma' => $lexicon['lemma']]);
+            if (!$corpusEntity instanceof Corpus) {
+                $corpusEntity = $this->builder->create(Corpus::class)->build($lexicon)->getConcrete();
+            }
+            $wordEntity->setCorpus($corpusEntity);
+        }
+        return $wordEntity;
     }
 }

@@ -12,22 +12,22 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Table(name="ss_topic")
  */
-final class Topic extends SemanticEntity
+ class Topic extends SemanticEntity
 {
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    protected $id;
     /**
      * @ORM\Column(type="string")
      */
-    private $topic;
+    protected $topic;
     /**
      * @ORM\Column(type="string")
      */
-    private $tag;
+    protected $tag;
 
     public function getId()
     {

@@ -14,46 +14,46 @@ use Semantics\RatingBundle\Interfaces\SemanticEntityHolder;
  * @ORM\Entity(repositoryClass="Semantics\RatingBundle\Repository\ReviewRepository")
  * @ORM\Table(name="ss_review",indexes={@ORM\Index(name="hash_idx", columns={"hash"})})
  */
-final class Review extends SemanticEntity
+class Review extends SemanticEntity
 {
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    protected $id;
     /**
      * @ORM\Column(type="string", nullable=true, unique=true)
      */
-    private $hash;
+    protected $hash;
     /**
      * @ORM\Column(type="string")
      */
-    private $review;
+    protected $review;
     /**
      * @ORM\Column(type="decimal", precision=5, scale=2, nullable=false, options={"default" : 0})
      */
-    private $score;
+    protected $score;
     /**
      * @ORM\Column(type="integer")
      */
-    private $feedback;
+    protected $feedback;
     /**
      * @ORM\Column(type="integer", name="positiveCount", options={"default" : 0})
      */
-    private $positiveCount          = 0;
+    protected $positiveCount        = 0;
     /**
      * @ORM\Column(type="integer", name="negativeCount", options={"default" : 0})
      */
-    private $negativeCount          = 0;
+    protected $negativeCount        = 0;
     /**
      * @ORM\OneToMany(targetEntity="Expression", mappedBy="review", cascade={"persist"}, orphanRemoval=true)
      */
-    private $lines;
+    protected $lines;
     /**
      * @var ArrayCollection
      */
-    private $topics;
+    protected $topics;
     protected $methodRenderPatterns = ['/(?!^getTopics$)^get[a-zA-Z]+$/'];
 
     public function __construct()
@@ -106,15 +106,21 @@ final class Review extends SemanticEntity
     }
     public function getPositiveCount()
     {
-        return array_sum(array_map(function (SemanticEntityHolder $line) {
-                    return $line->getFeedback() == 1 ? 1 : 0;
-                }, $this->getLines()));
+        if (count($this->getLines())) {
+            return array_sum(array_map(function (SemanticEntityHolder $line) {
+                        return $line->getFeedback() == 1 ? 1 : 0;
+                    }, $this->getLines()->getValues()));
+        }
+        return 0;
     }
     public function getNegativeCount()
     {
-        return array_sum(array_map(function (SemanticEntityHolder $line) {
-                    return $line->getFeedback() == -1 ? 1 : 0;
-                }, $this->getLines()));
+        if (count($this->getLines())) {
+            return array_sum(array_map(function (SemanticEntityHolder $line) {
+                        return $line->getFeedback() == -1 ? 1 : 0;
+                    }, $this->getLines()->getValues()));
+        }
+        return 0;
     }
     public function setPositiveCount($positiveCount)
     {

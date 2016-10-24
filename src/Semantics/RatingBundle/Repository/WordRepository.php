@@ -21,10 +21,9 @@ class WordRepository extends EntityRepository
      * @param SemanticEntityHolder $entity
      * @return SemanticEntityHolder
      */
-    public function save(RegistryInterface $orm, SemanticEntityHolder $entity)
+    public function fetch(RegistryInterface $orm, SemanticEntityHolder $entity)
     {
-        $matches        = $this->findBy(['word' => $entity->getWord()]);
-        $existingEntity = array_shift($matches);
+        $existingEntity = $this->findOneBy(['word' => $entity->getWord()]);
         if (!$existingEntity instanceof SemanticEntityHolder) {
             $orm->getManager()->persist($entity);
             $orm->getManager()->flush();

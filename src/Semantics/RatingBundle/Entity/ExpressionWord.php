@@ -20,33 +20,33 @@ class ExpressionWord extends SemanticEntity
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    protected $id;
     /**
      * @var int
      *
      * @ORM\Column(name="word_id", type="integer")
      */
-    private $wordId;
+    protected $wordId;
     /**
-     * @ORM\ManyToOne(targetEntity="Word", inversedBy="expressionsContaingWord")
+     * @ORM\ManyToOne(targetEntity="Word", inversedBy="expressionsContaingWord", cascade={"persist"})
      * @ORM\JoinColumn(name="word_id", referencedColumnName="id")
      */
-    private $word;
+    protected $word;
     /**
      * @var int
      *
      * @ORM\Column(name="expression_id", type="integer")
      */
-    private $expressionId;
+    protected $expressionId;
     /**
      * @ORM\ManyToOne(targetEntity="Expression", inversedBy="wordsInExpression")
      * @ORM\JoinColumn(name="expression_id", referencedColumnName="id")
      */
-    private $expression;
+    protected $expression;
     /**
      * @ORM\Column(type="integer")
      */
-    private $position;
+    protected $position;
 
     /**
      * Get id

@@ -2,6 +2,7 @@
 
 namespace Semantics\RatingBundle\Services;
 
+use Doctrine\Common\Util\Debug;
 use Semantics\RatingBundle\Entity\Corpus;
 use Semantics\RatingBundle\Entity\Expression;
 use Semantics\RatingBundle\Entity\ExpressionWord;
@@ -50,18 +51,22 @@ final class ReviewAnalyzer implements StrategyDigestor
 
         array_walk($lines, function (SemanticEntityHolder &$lineEntity) use ($topics) {
             /* @var $exprEntity Expression  */
-            $subordinates                  = preg_split(self::PHRASE_SPLITTER_REGEXP, $lineEntity->getExpression());
+            //$subordinates                  = preg_split(self::PHRASE_SPLITTER_REGEXP, $lineEntity->getExpression());
             $definitiveRelevantExpressions = [];
-            foreach ($subordinates as $subExpression) {
-                $relevantExpressions           = array_filter($this->ngramSentenceParser($subExpression, self::WINDOW_SIZE, $topics));
+            foreach ($lineEntity->getFragments() as $subExpression) {
+
+                $relevantExpressions = array_filter($this->ngramSentenceParser($lineEntity, $subExpression, self::WINDOW_SIZE, $topics));
+
                 $definitiveRelevantExpressions += [$this->maxScore($relevantExpressions, $lineEntity->getFeedback())];
             }
-            //var_dump("----------------------");
-            //var_dump(array_map(function ($candidateFragment) {
-            //            var_dump("{$candidateFragment->getFeedback()} Candidate ({$candidateFragment->getScore()}): " . $candidateFragment->getExpression());
-            //        }, $definitiveRelevantExpressions));
+            // var_dump("----------------------");
+            // var_dump(array_map(function ($candidateFragment) {
+            //             var_dump("{$candidateFragment->getFeedback()} Candidate ({$candidateFragment->getScore()}): " . $candidateFragment->getExpression());
+            //         }, $definitiveRelevantExpressions));
             if (count($definitiveRelevantExpressions)) {
-                $lineEntity->setFragments($definitiveRelevantExpressions);
+                $lineEntity->setFragments(array_map(function ($e) use ($lineEntity) {
+                            return $e->setSentence($lineEntity)->setReview($lineEntity->getReview());
+                        }, $definitiveRelevantExpressions));
             }
             //var_dump(array_map(function ($e) {
             //            return $e->toArray();
@@ -71,30 +76,6 @@ final class ReviewAnalyzer implements StrategyDigestor
         });
 
         return $review;
-    }
-    /**
-     *
-     * @param string $sentence
-     * @return array
-     */
-    private function tokenizeExpression($sentence)
-    {
-        $words                 = preg_split(self::WORD_SEPARATOR, trim($sentence));
-        $expresionWordEntities = [];
-        foreach ($words as $position => $word) {
-            if (strlen(trim($word)) > 0) {
-                $expresionWordEntities[] = $this->tokenizeExpressionWord(trim($word), $position);
-            }
-        }
-
-        return $expresionWordEntities;
-    }
-    private function tokenizeExpressionWord($word, $position)
-    {
-        $wordEntity     = $this->tokenizeWord($word);
-        $expressionWord = $this->builder->create(ExpressionWord::class)->build(['word' => $wordEntity, 'position' => $position])->getConcrete();
-
-        return $expressionWord;
     }
     private function tokenizeWord($word)
     {
@@ -118,15 +99,6 @@ final class ReviewAnalyzer implements StrategyDigestor
 
         return $max;
     }
-    private function getRelevantExpressions(array $fragments)
-    {
-
-        return array_filter($fragments, function ($expr) {
-            var_dump($expr->toArray());
-            die($expr->getExpression());
-            return true; //$expr->hasAnyClasses(['noun', 'adjective', 'negative']); // && $expr->hasAllClasses(['noun', 'adjective']);
-        });
-    }
     private function getCriteria($topics, $word)
     {
         return $word->getClass() == 'adjective' || $word->getClass() == 'negative' ||
@@ -135,11 +107,12 @@ final class ReviewAnalyzer implements StrategyDigestor
     private function ngramSentenceParser($subExpression, $window, $topics)
     {
         $candidateExpressions = [];
-        $expressionWords      = $this->tokenizeExpression($subExpression);
-
-        $count  = count($expressionWords);
-        $size   = min((2 * $window) + 1, $count);
-        for ($i = $offset = 0; $i < $count; $i++) {
+        $expressionWords      = $subExpression->getWordsInExpression();
+        Debug::dump($expressionWords);
+        die;
+        $count                = count($expressionWords);
+        $size                 = min((2 * $window) + 1, $count);
+        for ($i = $offset               = 0; $i < $count; $i++) {
             $word   = $expressionWords[$i];
             $offset = $i - $window;
             $start  = max(0, min($offset, $count - $size));

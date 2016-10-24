@@ -29,51 +29,51 @@ class Expression extends SemanticEntity
     /**
      * @ORM\Column(type="string")
      */
-    private $hash;
+    protected $hash;
     /**
      * @var integer
      *
      * @ORM\Column(type="integer", name="review_id")
      */
-    private $reviewId;
+    protected $reviewId;
     /**
      * @var string
      *
      * @ORM\Column(type="string")
      */
-    private $expression;
+    protected $expression;
     /**
      * @var integer
      *
      * @ORM\Column(name="expression_id", type="integer", nullable=true)
      */
-    private $expressionId;
+    protected $expressionId;
     /**
      * @ORM\OneToMany(targetEntity="Expression", mappedBy="sentence", cascade={"persist"}, orphanRemoval=true)
      */
-    private $fragments;
+    protected $fragments;
     /**
      * @ORM\ManyToOne(targetEntity="Expression", inversedBy="fragments")
      * @ORM\JoinColumn(name="expression_id", referencedColumnName="id")
      */
-    private $sentence;
+    protected $sentence;
     /**
      * @ORM\Column(type="decimal", precision=5, scale=2, nullable=false, options={"default" : 0})
      */
-    private $score;
+    protected $score;
     /**
      * @ORM\Column(type="integer")
      */
-    private $feedback;
+    protected $feedback;
     /**
      * @ORM\ManyToOne(targetEntity="Review", inversedBy="lines")
      * @ORM\JoinColumn(name="review_id", referencedColumnName="id")
      */
-    private $review;
+    protected $review;
     /**
      * @ORM\OneToMany(targetEntity="ExpressionWord", mappedBy="expression", cascade={"persist"}, orphanRemoval=true)
      */
-    private $wordsInExpression;
+    protected $wordsInExpression;
     /**
      *
      * @var array

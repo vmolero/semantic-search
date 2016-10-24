@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div id="wrapper">
+        <div id="container">
+            <div id="welcome">
+                <h1><span>Welcome to</span> Symfony {{ constant('Symfony\\Component\\HttpKernel\\Kernel::VERSION') }}</h1>
+            </div>
+
+            <div id="status">
+                <p>
+                <ul>
+                    {% for expression in review.lines %}
+                        <li>{{ expression.expression }} {{ expression.score }} {{ expression.feedback == 1 ? 'POSITIVE' : (expression.feedback == -1 ? 'NEGATIVE' : 'NEUTRAL') }}</li>
+                        {% endfor %}
+
+                </ul>
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

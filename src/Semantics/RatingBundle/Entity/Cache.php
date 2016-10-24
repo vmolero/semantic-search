@@ -15,11 +15,11 @@ class Cache implements SemanticEntityHolder
      * @ORM\Column(type="string", name="ckey")
      * @ORM\Id
      */
-    private $key;
+    protected $key;
     /**
      * @ORM\Column(type="string", name="cvalue", nullable=false)
      */
-    private $value;
+    protected $value;
 
     public function getKey()
     {

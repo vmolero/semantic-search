@@ -3,6 +3,7 @@
 namespace Semantics\RatingBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * Description of Corpus
@@ -11,27 +12,28 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @ORM\Entity(repositoryClass="Semantics\RatingBundle\Repository\CorpusRepository")
  * @ORM\Table(name="ss_corpus")
+ * @UniqueEntity("lemma")
  */
-final class Corpus extends SemanticEntity
+class Corpus extends SemanticEntity
 {
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    protected $id;
     /**
      * @ORM\Column(type="string", unique=true)
      */
-    private $lemma;
+    protected $lemma;
     /**
      * @ORM\Column(type="string")
      */
-    private $class;
+    protected $class;
     /**
      * @ORM\Column(type="string", nullable=true)
      */
-    private $stem;
+    protected $stem;
 
     public function getId()
     {

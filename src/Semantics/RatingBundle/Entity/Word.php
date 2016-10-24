@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="Semantics\RatingBundle\Repository\WordRepository")
  * @ORM\Table(name="ss_word", indexes={@ORM\Index(name="word_idx", columns={"word"})})
  */
-final class Word extends SemanticEntity
+class Word extends SemanticEntity
 {
     /**
      * @var integer
@@ -21,37 +21,37 @@ final class Word extends SemanticEntity
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    protected $id;
     /**
      * @var string
      *
      * @ORM\Column(type="string", unique=true)
      */
-    private $word;
+    protected $word;
     /**
      * @var integer
      *
      * @ORM\Column(name="corpus_id", type="integer", nullable=true)
      */
-    private $corpusId;
+    protected $corpusId;
     /**
-     * @ORM\ManyToOne(targetEntity="Corpus")
+     * @ORM\ManyToOne(targetEntity="Corpus", cascade={"persist"})
      * @ORM\JoinColumn(name="corpus_id", referencedColumnName="id")
      */
-    private $corpus;
+    protected $corpus;
     /**
      * @ORM\Column(type="decimal", precision=5, scale=2, nullable=true, options={"default" : 0})
      */
-    private $score;
+    protected $score;
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    private $feedback;
+    protected $feedback;
     /**
 
-     * @ORM\OneToMany(targetEntity="ExpressionWord", mappedBy="word", cascade={"persist"}, orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="ExpressionWord", mappedBy="word")
      */
-    private $expressionsContaingWord;
+    protected $expressionsContaingWord;
     protected $methodRenderPatterns = ['/(?!^getExpressionsContaingWord$)^get[a-zA-Z]+$/'];
 
     public function __construct()
