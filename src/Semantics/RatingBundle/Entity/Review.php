@@ -109,7 +109,7 @@ class Review extends SemanticEntity
         if (count($this->getLines())) {
             return array_sum(array_map(function (SemanticEntityHolder $line) {
                         return $line->getFeedback() == 1 ? 1 : 0;
-                    }, $this->getLines()->getValues()));
+                    }, $this->getLines()));
         }
         return 0;
     }
@@ -118,7 +118,7 @@ class Review extends SemanticEntity
         if (count($this->getLines())) {
             return array_sum(array_map(function (SemanticEntityHolder $line) {
                         return $line->getFeedback() == -1 ? 1 : 0;
-                    }, $this->getLines()->getValues()));
+                    }, $this->getLines()));
         }
         return 0;
     }

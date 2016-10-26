@@ -42,21 +42,7 @@ class Expression extends SemanticEntity
      * @ORM\Column(type="string")
      */
     protected $expression;
-    /**
-     * @var integer
-     *
-     * @ORM\Column(name="expression_id", type="integer", nullable=true)
-     */
-    protected $expressionId;
-    /**
-     * @ORM\OneToMany(targetEntity="Expression", mappedBy="sentence", cascade={"persist"}, orphanRemoval=true)
-     */
-    protected $fragments;
-    /**
-     * @ORM\ManyToOne(targetEntity="Expression", inversedBy="fragments")
-     * @ORM\JoinColumn(name="expression_id", referencedColumnName="id")
-     */
-    protected $sentence;
+        
     /**
      * @ORM\Column(type="decimal", precision=5, scale=2, nullable=false, options={"default" : 0})
      */
@@ -78,11 +64,10 @@ class Expression extends SemanticEntity
      *
      * @var array
      */
-    protected $methodRenderPatterns = ['/(?!(^getReview$|^getSentence$))^get[a-zA-Z]+$/'];
+    protected $methodRenderPatterns = ['/(?!(^getReview$))^get[a-zA-Z]+$/'];
 
     public function __construct()
     {
-        $this->fragments         = new ArrayCollection();
         $this->wordsInExpression = new ArrayCollection();
     }
     public function getId()
@@ -100,18 +85,6 @@ class Expression extends SemanticEntity
     public function getExpression()
     {
         return $this->expression;
-    }
-    public function getExpressionId()
-    {
-        return $this->expressionId;
-    }
-    public function getFragments()
-    {
-        return $this->fragments;
-    }
-    public function getSentence()
-    {
-        return $this->sentence;
     }
     public function getScore()
     {
@@ -147,21 +120,6 @@ class Expression extends SemanticEntity
     public function setExpression($expression)
     {
         $this->expression = $expression;
-        return $this;
-    }
-    public function setExpressionId($expressionId)
-    {
-        $this->expressionId = $expressionId;
-        return $this;
-    }
-    public function setFragments($fragments)
-    {
-        $this->fragments = $fragments;
-        return $this;
-    }
-    public function setSentence($sentence)
-    {
-        $this->sentence = $sentence;
         return $this;
     }
     public function setScore($score)

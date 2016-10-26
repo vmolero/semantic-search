@@ -2,10 +2,10 @@
 
 namespace Semantics\RatingBundle\Services;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Util\Debug;
 use Semantics\RatingBundle\Entity\Corpus;
 use Semantics\RatingBundle\Entity\Expression;
-use Semantics\RatingBundle\Entity\ExpressionWord;
 use Semantics\RatingBundle\Entity\Word;
 use Semantics\RatingBundle\Interfaces\SemanticEntityHolder;
 use Semantics\RatingBundle\Interfaces\StrategyDigestor;
@@ -29,8 +29,9 @@ final class ReviewAnalyzer implements StrategyDigestor
     private $morph;
 
     const CLASS_DISCRIMINATOR    = ['noun', 'adjective', 'negative', 'adverb']; // 'pronoun', 'verb'
-    const PHRASE_SPLITTER_REGEXP = '/[,;:]+/';
-    const WORD_SEPARATOR         = '/[\s]+/';
+    const PHRASE_SPLITTER_REGEXP = '/[\.,;:]+/';
+    const WORD_SEPARATOR_REGEXP  = '/[\s]+/';
+    const CLEANUP_REGEXP         = '/[^a-zA-Z\.:,;\s\']+/';
     const WINDOW_SIZE            = 2;
 
     public function __construct(MorphAdorner $morph, RepositoryBuilder $builder)
@@ -44,38 +45,34 @@ final class ReviewAnalyzer implements StrategyDigestor
     }
     private function analyze(SemanticEntityHolder $review)
     {
-        $lines  = $review->getLines();
         $topics = array_map(function (SemanticEntityHolder $word) {
             return $this->tokenizeWord($word->getTopic())->getStem();
         }, $review->getTopics());
 
-        array_walk($lines, function (SemanticEntityHolder &$lineEntity) use ($topics) {
-            /* @var $exprEntity Expression  */
-            //$subordinates                  = preg_split(self::PHRASE_SPLITTER_REGEXP, $lineEntity->getExpression());
-            $definitiveRelevantExpressions = [];
-            foreach ($lineEntity->getFragments() as $subExpression) {
-
-                $relevantExpressions = array_filter($this->ngramSentenceParser($lineEntity, $subExpression, self::WINDOW_SIZE, $topics));
-
-                $definitiveRelevantExpressions += [$this->maxScore($relevantExpressions, $lineEntity->getFeedback())];
+        $subordinates = preg_split(self::PHRASE_SPLITTER_REGEXP, $this->cleanup($review->getReview()));
+        $relevant = [];
+        foreach ($subordinates as $eligible) {
+            $relevantExpressions = array_filter($this->ngramSentenceParser(trim($eligible), self::WINDOW_SIZE, $topics));
+            $max =  $this->maxScore($relevantExpressions, $review->getFeedback());
+            if (!is_null($max)) {
+                $max->setReview($review);
+                $relevant[] = $max;
             }
-            // var_dump("----------------------");
-            // var_dump(array_map(function ($candidateFragment) {
-            //             var_dump("{$candidateFragment->getFeedback()} Candidate ({$candidateFragment->getScore()}): " . $candidateFragment->getExpression());
-            //         }, $definitiveRelevantExpressions));
-            if (count($definitiveRelevantExpressions)) {
-                $lineEntity->setFragments(array_map(function ($e) use ($lineEntity) {
-                            return $e->setSentence($lineEntity)->setReview($lineEntity->getReview());
-                        }, $definitiveRelevantExpressions));
-            }
-            //var_dump(array_map(function ($e) {
-            //            return $e->toArray();
-            //        }, $definitiveRelevantExpressions));
-            //die;
-            // $relevantExpressions = $this->getRelevantExpressions($matchingFeedbackExpressions);
-        });
+        }
+        if (count($relevant)) {
+            $review->setLines($relevant);
+        }
 
         return $review;
+    }
+    /**
+     *
+     * @param string $text
+     * @return string
+     */
+    private function cleanup($text)
+    {
+        return trim(preg_replace(self::CLEANUP_REGEXP, ' ', $text));
     }
     private function tokenizeWord($word)
     {
@@ -104,29 +101,38 @@ final class ReviewAnalyzer implements StrategyDigestor
         return $word->getClass() == 'adjective' || $word->getClass() == 'negative' ||
                 (preg_match('/(^' . implode('$|^', $topics) . '$)/', $word->getStem()) == 1 && $word->getClass() == 'noun');
     }
-    private function ngramSentenceParser($subExpression, $window, $topics)
+    private function ngramSentenceParser($eligible, $window, $topics)
     {
         $candidateExpressions = [];
-        $expressionWords      = $subExpression->getWordsInExpression();
-        Debug::dump($expressionWords);
-        die;
-        $count                = count($expressionWords);
-        $size                 = min((2 * $window) + 1, $count);
-        for ($i = $offset               = 0; $i < $count; $i++) {
-            $word   = $expressionWords[$i];
+        $words = preg_split(self::WORD_SEPARATOR_REGEXP, $eligible);
+        $count = count($words);
+        $size = min($count, (2*$window)+1);
+        for ($i = 0; $i < $count; $i++) {
+            $word   = $words[$i];
             $offset = $i - $window;
             $start  = max(0, min($offset, $count - $size));
-            // $end    = min($count, $start + (2 * $window) + 1);
-            // var_dump("pointer $i {$word->getWordInExpression()}. $start::$end out of $count");
-            if ($this->getCriteria($topics, $word)) {
-                $nGram       = array_slice($expressionWords, max(0, min($offset, $count - $size)), $size);
-                $nGramString = trim(implode(' ', array_map(function (SemanticEntityHolder $exprWord) {
-                                    return $exprWord->getWordInExpression();
-                                }, $nGram)));
-                //var_dump($nGramString);
-                $candidateExpressions[] = $this->builder->create(Expression::class)->build(['expression' => $nGramString, 'hash' => md5($nGramString), 'wordsInExpression' => $nGram] + $this->morph->sentimentAnalyzer($nGramString))->getConcrete();
+            if ($this->getCriteria($topics, $this->tokenizeWord($word))) {
+                $nGram       = array_slice($words, max(0, min($offset, $count - $size)), $size);
+                $nGramString = implode(' ', $nGram);
+                $candidateExpressions[] = $this->builder->create(Expression::class)->build(['expression' => $nGramString, 'hash' => md5($nGramString)] + $this->morph->sentimentAnalyzer($nGramString))->getConcrete();
+                
             }
         }
         return $candidateExpressions;
+    }
+
+    private function parseExpressionWord($cadena, $expression)
+    {
+        $words = preg_split(self::WORD_SEPARATOR_REGEXP, trim($cadena));
+        $i     = 0;
+        return array_map(function ($word) use (&$i, $expression) {
+            return $this->initExpressionWord($this->initWord($word), $i++, $expression);
+        }, $words);
+    }
+    private function initExpressionWord($wordEntity, $position, $exprEntity = null)
+    {
+        $expressionWord = $this->builder->create(ExpressionWord::class)->build(['word' => $wordEntity, 'position' => $position, 'expression' => $exprEntity])->getConcrete();
+
+        return $expressionWord;
     }
 }

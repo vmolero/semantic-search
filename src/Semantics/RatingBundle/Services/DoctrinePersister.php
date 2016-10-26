@@ -44,9 +44,7 @@ final class DoctrinePersister implements ReviewPersister
      */
     private $review;
 
-    const PHRASE_SPLITTER_REGEXP = '/[,;:]+/';
-    const WORD_SEPARATOR_REGEXP  = '/[\s]+/';
-    const CLEANUP_REGEXP         = '/[^a-zA-Z,;\s\']+/';
+    
 
     /**
      *
@@ -63,21 +61,12 @@ final class DoctrinePersister implements ReviewPersister
     }
     public function initReview($review)
     {
-        $score        = $this->morph->sentimentAnalyzer($review);
-        $this->review = $this->builder->create(Review::class)->build(['review' => $review, 'hash' => md5($review)] + $score)->getConcrete();
-        $this->review->setLines(array_map(function($line) {
-                    $lineEntity   = $this->parseExpression($this->cleanup($line), $this->review);
-                    $subordinates = preg_split(self::PHRASE_SPLITTER_REGEXP, $lineEntity->getExpression());
-                    $fragments    = [];
-                    foreach ($subordinates as $subline) {
-                        $fragment = $this->parseExpression($subline, $this->review, $lineEntity);
-
-                        $fragment->setWordsInExpression($this->parseExpressionWord($subline, $lineEntity));
-                        $fragments[] = $fragment;
-                    }
-                    $lineEntity->setFragments($fragments);
-                    return $lineEntity;
-                }, $this->split($this->review->getReview())));
+        $uui = md5(trim($review));
+        $this->review = $this->doctrine->getRepository('RatingBundle:Review')->findOneBy(['hash' => $uui]);
+        if (!$this->review instanceof Review) {
+            $score        = $this->morph->sentimentAnalyzer($review);
+            $this->review = $this->builder->create(Review::class)->build(['review' => trim($review), 'hash' => $uui] + $score)->getConcrete();
+        }
         $this->review->setTopics($this->doctrine->getRepository('RatingBundle:Topic')->findAll());
         return $this;
     }
@@ -106,14 +95,13 @@ final class DoctrinePersister implements ReviewPersister
                 $this->doctrine->getManager()->persist($review);
                 $this->doctrine->getManager()->flush();
                 return $this;
-            } else {
-                $myReviewEntity = $review;
-                $this->doctrine->getManager()->flush();
-                return $this;
             }
         } catch (UniqueConstraintViolationException $exc) {
-            var_dump($exc->getMessage());
-            die;
+            // var_dump($exc->getMessage());
+            // die;
+            // return $this;
+            throw $exc;
+        } finally {
             return $this;
         }
     }
@@ -132,47 +120,15 @@ final class DoctrinePersister implements ReviewPersister
             $entityScore      = empty($score) ? $this->morph->sentimentAnalyzer($expression) : $score;
             $expressionEntity = $this->builder->create(Expression::class)
                             ->build(['review' => $reviewEntity,
-                                'sentence' => $lineEntity,
                                 'hash' => md5($expression),
                                 'expression' => $expression] + $entityScore)->getConcrete();
             return $expressionEntity;
         }
         return $expressionEntity;
     }
-    /**
-     *
-     * @param string $text
-     * @return string
-     */
-    private function split($text)
-    {
-        return array_filter(explode('.', $text), function ($line) {
-            return strlen(trim($line)) > 0 && preg_match('/[a-zA-Z]/', trim($line));
-        });
-    }
-    /**
-     *
-     * @param string $text
-     * @return string
-     */
-    private function cleanup($text)
-    {
-        return trim(preg_replace(self::CLEANUP_REGEXP, ' ', $text));
-    }
-    private function parseExpressionWord($cadena, $expression)
-    {
-        $words = preg_split(self::WORD_SEPARATOR_REGEXP, trim($cadena));
-        $i     = 0;
-        return array_map(function ($word) use (&$i, $expression) {
-            return $this->initExpressionWord($this->initWord($word), $i++, $expression);
-        }, $words);
-    }
-    private function initExpressionWord($wordEntity, $position, $exprEntity = null)
-    {
-        $expressionWord = $this->builder->create(ExpressionWord::class)->build(['word' => $wordEntity, 'position' => $position, 'expression' => $exprEntity])->getConcrete();
-
-        return $expressionWord;
-    }
+    
+    
+    
     public function initWord($word)
     {
         $debug = false;

@@ -23,7 +23,10 @@ class SemanticApp implements Handler
     }
     public function handle($review)
     {
-        $scoredEntity = $this->strategy->digest($this->persister->initReview($review)->getReview());
+        $initReview = $this->persister->initReview($review)->getReview();
+        $scoredEntity = $this->strategy->digest($initReview);
+        print_r($scoredEntity->toArray());
+        die;
         return $this->persister->saveReview($scoredEntity)->getReview();
     }
 }
