@@ -48,7 +48,7 @@ class Word extends SemanticEntity
      */
     protected $feedback;
     /**
-
+     *
      * @ORM\OneToMany(targetEntity="ExpressionWord", mappedBy="word")
      */
     protected $expressionsContaingWord;

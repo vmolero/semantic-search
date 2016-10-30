@@ -4,6 +4,7 @@ namespace Semantics\RatingBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as RTG;
 
@@ -12,19 +13,31 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration as RTG;
  */
 class RatingController extends Controller
 {
+    
+    /**
+     * @RTG\Route("/new")
+     * @RTG\Method({"get"})
+     * @param Request $request
+     * @return Response
+     */
+    public function newAction(Request $request)
+    {
+        return $this->render('RatingBundle:Rating:new.html.twig', ['page'=> 'rate']);
+    }
+
     /**
      * @RTG\Route("/review")
      * @RTG\Method({"post"})
      *
      * @param Request $request
-     * @return JsonResponse
+     * @return Response
      */
-    public function reviewAction(Request $request)
+    public function doAction(Request $request)
     {
         $scoredReview = $this->get('SemanticApp')->handle($request->request->get('review'));
         if ($request->isXmlHttpRequest()) {
             return new JsonResponse($scoredReview->toString());
         }
-        return $this->render('RatingBundle:Rating:review.html.twig', ['review' => $scoredReview->toArray()]);
+        return $this->render('RatingBundle:Rating:review.html.twig', ['page'=> 'rate', 'review' => $scoredReview->toArray()]);
     }
 }

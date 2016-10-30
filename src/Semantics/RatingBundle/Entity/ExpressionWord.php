@@ -40,7 +40,7 @@ class ExpressionWord extends SemanticEntity
     protected $expressionId;
     /**
      * @ORM\ManyToOne(targetEntity="Expression", inversedBy="wordsInExpression")
-     * @ORM\JoinColumn(name="expression_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="expression_id", referencedColumnName="id", onDelete="CASCADE")
      */
     protected $expression;
     /**

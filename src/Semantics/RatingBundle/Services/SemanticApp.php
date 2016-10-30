@@ -25,8 +25,6 @@ class SemanticApp implements Handler
     {
         $initReview = $this->persister->initReview($review)->getReview();
         $scoredEntity = $this->strategy->digest($initReview);
-        print_r($scoredEntity->toArray());
-        die;
         return $this->persister->saveReview($scoredEntity)->getReview();
     }
 }

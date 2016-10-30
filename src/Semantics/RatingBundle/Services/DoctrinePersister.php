@@ -82,6 +82,11 @@ final class DoctrinePersister implements ReviewPersister
     {
         return $this->review;
     }
+    public function delete ($entity) {
+        $this->doctrine->getManager()->remove($entity);
+        $this->doctrine->getManager()->flush();
+        return $this;
+    }
     /**
      *
      * @param RevireEntity $review
@@ -129,7 +134,7 @@ final class DoctrinePersister implements ReviewPersister
     
     
     
-    public function initWord($word)
+    private function initWord($word)
     {
         $debug = false;
         if ($word == 'bad') {

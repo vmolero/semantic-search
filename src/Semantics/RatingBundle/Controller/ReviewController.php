@@ -7,11 +7,16 @@ use Semantics\RatingBundle\Interfaces\SemanticEntityHolder;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration as RTG;
 
+/**
+ * @RTG\Route("/review")
+ */
 class ReviewController extends Controller
 {
     /**
-     *
+     * @RTG\Route("/")
+     * @RTG\Method({"get"})
      * @param Request $request
      * @return type
      */
@@ -25,26 +30,18 @@ class ReviewController extends Controller
             return $entity->toArray();
         }, $r);
 
-        return $this->render('RatingBundle:Review:index.html.twig', ['list' => $r2]);
+        return $this->render('RatingBundle:Review:index.html.twig', ['page'=> 'index','reviews' => $r2]);
     }
     /**
-     *
+     * @RTG\Route("/{id}/delete")
+     * @RTG\Method({"get"})
      * @param Request $request
      * @return type
      */
-    public function ajaxfetchallAction(Request $request)
+    public function deleteAction(Request $request, $id)
     {
-        $r  = $this->getDoctrine()
-                ->getRepository('RatingBundle:Review')
-                ->findBy([], ['id' => $request->query->get('sord')], $request->query->get('rows'), ($request->query->get('page') - 1) * $request->query->get('rows'));
-        /** @var Review $r */
-        $r2 = array_map(function (SemanticEntityHolder $entity) {
-            return $entity->toArray();
-        }, $r);
-
-        $response = new JsonResponse();
-        $response->setData($r2);
-        $response->setCallback($request->query->get('callback'));
-        return $response;
+        $entity = $this->getDoctrine()->getRepository('RatingBundle:Review')->find($id);
+        $this->get('DoctrinePersister')->delete($entity);
+        return $this->redirect('/review');
     }
 }

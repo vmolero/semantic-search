@@ -3,20 +3,16 @@
 {% block body %}
     <div id="wrapper">
         <div id="container">
-            <div id="welcome">
-                <h1><span>Welcome to</span> Symfony {{ constant('Symfony\\Component\\HttpKernel\\Kernel::VERSION') }}</h1>
-            </div>
-
-            <div id="status">
-                <p>
-                <ul>
+            <h2>Review</h2>
+            <p>{{ review.review }}</p>
+            <h2>Results</h2>
+            <ul>
                     {% for expression in review.lines %}
                         <li>{{ expression.expression }} {{ expression.score }} {{ expression.feedback == 1 ? 'POSITIVE' : (expression.feedback == -1 ? 'NEGATIVE' : 'NEUTRAL') }}</li>
                         {% endfor %}
 
-                </ul>
-                </p>
-            </div>
+            </ul>
+            <p><a href="/rate/new" class="btn btn-link" role="button">Rate another</a></p>    
         </div>
     </div>
 {% endblock %}

@@ -1,6 +1,6 @@
 RatingBundle:
-    resource: "@RatingBundle/Controller/RatingController.php"
-    type:     annotation
+    resource: "@RatingBundle/Resources/config/routing.yml"
+    prefix:   /
 thrace_data_grid:
     resource: "@ThraceDataGridBundle/Resources/config/routing.xml"
     prefix:   /

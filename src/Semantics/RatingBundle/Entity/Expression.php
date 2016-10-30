@@ -53,7 +53,7 @@ class Expression extends SemanticEntity
     protected $feedback;
     /**
      * @ORM\ManyToOne(targetEntity="Review", inversedBy="lines")
-     * @ORM\JoinColumn(name="review_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="review_id", referencedColumnName="id", onDelete="CASCADE")
      */
     protected $review;
     /**

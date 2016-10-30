@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+{% block header2 %}
+	New review to rate
+{% endblock %}
+{% block body %}
+    <div id="wrapper">
+        <div id="container">
+            <form method="post" action="/rate/review">
+              <div class="form-group">
+            	<p><textarea class="form-control" name="review" placeholder="Paste here your review"></textarea></p>
+            	<p><button class="btn btn-default">Rate</button></p>
+        	  </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

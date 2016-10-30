@@ -50,17 +50,21 @@ final class ReviewAnalyzer implements StrategyDigestor
         }, $review->getTopics());
 
         $subordinates = preg_split(self::PHRASE_SPLITTER_REGEXP, $this->cleanup($review->getReview()));
-        $relevant = [];
+        $relevantExpressions = [];
         foreach ($subordinates as $eligible) {
-            $relevantExpressions = array_filter($this->ngramSentenceParser(trim($eligible), self::WINDOW_SIZE, $topics));
-            $max =  $this->maxScore($relevantExpressions, $review->getFeedback());
-            if (!is_null($max)) {
+            $relevantExpressions = array_merge($relevantExpressions, array_filter($this->ngramSentenceParser(trim($eligible), self::WINDOW_SIZE, $topics)));
+            // $max =  $this->maxScore($relevantExpressions, $review->getFeedback());
+            if (false && !is_null($max)) {
                 $max->setReview($review);
                 $relevant[] = $max;
             }
         }
-        if (count($relevant)) {
-            $review->setLines($relevant);
+        foreach($relevantExpressions as &$expr) 
+        {
+            $expr->setReview($review);
+        }
+        if (count($relevantExpressions)) {
+            $review->setLines(new ArrayCollection($relevantExpressions));
         }
 
         return $review;
@@ -114,7 +118,7 @@ final class ReviewAnalyzer implements StrategyDigestor
             if ($this->getCriteria($topics, $this->tokenizeWord($word))) {
                 $nGram       = array_slice($words, max(0, min($offset, $count - $size)), $size);
                 $nGramString = implode(' ', $nGram);
-                $candidateExpressions[] = $this->builder->create(Expression::class)->build(['expression' => $nGramString, 'hash' => md5($nGramString)] + $this->morph->sentimentAnalyzer($nGramString))->getConcrete();
+                $candidateExpressions[md5($nGramString)] = $this->builder->create(Expression::class)->build(['expression' => $nGramString, 'hash' => md5($nGramString)] + $this->morph->sentimentAnalyzer($nGramString))->getConcrete();
                 
             }
         }
