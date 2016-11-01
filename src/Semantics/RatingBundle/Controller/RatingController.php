@@ -34,10 +34,14 @@ class RatingController extends Controller
      */
     public function doAction(Request $request)
     {
-        $scoredReview = $this->get('SemanticApp')->handle($request->request->get('review'));
+        $input = $request->request->get('review');
+        if (strlen($input) > 0) {
+        $scoredReview = $this->get('SemanticApp')->handle();
         if ($request->isXmlHttpRequest()) {
             return new JsonResponse($scoredReview->toString());
         }
         return $this->render('RatingBundle:Rating:review.html.twig', ['page'=> 'rate', 'review' => $scoredReview->toArray()]);
+        }
+        return $this->redirect('/rate/new');
     }
 }

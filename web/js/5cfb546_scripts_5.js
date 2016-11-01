@@ -1,6 +1,6 @@
  $(document).ready(function () {			
     $("#jqGrid").jqGrid({
-        url: 'http://localhost:8000/ajax/review/',
+        url: 'http://localhost:8000/ajax/criteria/',
         mtype: "GET",
         styleUI : 'Bootstrap',
         datatype: "jsonp",
