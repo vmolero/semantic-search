@@ -1,4 +1,4 @@
-bower install
-composer install
-php app/console assets:install --symlink web
-php app/console assetic:dump
+call bower install
+call composer install
+call php app/console assets:install --symlink web
+call php app/console assetic:dump

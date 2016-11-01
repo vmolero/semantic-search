@@ -1,3 +1,5 @@
+#!/bin/bash
+
 bower install
 composer install
 php app/console assets:install --symlink web
