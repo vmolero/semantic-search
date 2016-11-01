@@ -36,7 +36,7 @@ class RatingController extends Controller
     {
         $input = $request->request->get('review');
         if (strlen($input) > 0) {
-        $scoredReview = $this->get('SemanticApp')->handle();
+        $scoredReview = $this->get('SemanticApp')->handle($input);
         if ($request->isXmlHttpRequest()) {
             return new JsonResponse($scoredReview->toString());
         }
