@@ -2,9 +2,9 @@ Requirements
 ============
 
 + PHP >= 5.6
++ Curl module enabled at php.ini
 + Node.js (https://nodejs.org/en/download/)
 + Bower ($ npm install -g bower)
-+ Symfony 2.8
 + Git
 + Composer
 + Firefox
